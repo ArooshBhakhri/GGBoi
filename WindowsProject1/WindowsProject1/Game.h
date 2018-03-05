@@ -15,12 +15,15 @@ private:
 	DXGI_SWAP_CHAIN_DESC scd;
 	ID3D11Resource *buffer;
 	ID3D11RenderTargetView *view;
+	
+	ID3D11DepthStencilView *dStencilView;
+	ID3D11Texture2D *depthStencilTexture;
 
 	float baseColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	//Shapes//////////////////
-	ID3D11Buffer *triangleBuffer;
-	SEND_TO_RAM triangleShader;
+	vector<Triangle> triangles;
+	vector<Line> lines;
 	///////////////////////////////////
 
 	//Shaders//////////////////////////
@@ -29,9 +32,34 @@ private:
 	ID3D11InputLayout *layout;
 	ID3D11Buffer *shaderBuffer;
 
+	//3D magic shit/////////////////////
+	ID3D11Buffer * cbPerObjectBuffer;
+
+	cbPerObject cbPerObj;
+
+	XMMATRIX WVP;
+	XMMATRIX World;
+	XMMATRIX camView;
+	XMMATRIX camProjection;
+
+	XMVECTOR camPosition;
+	XMVECTOR camTarget;
+	XMVECTOR camUp;
+	float xPos = 0.0f		,yPos = 0.0f,		zPos = -0.5f;
+	float xTarget = 0.0f	,yTarget = 0.0f,	zTarget = 0.0f;
+	float xCam = 0.0f,		yCam = 0.0f,		zCam = 0.0f;
+
+	float aspectRatio = ((float)BACKBUFFER_WIDTH / (float)BACKBUFFER_HEIGHT);
+
+	float verticalFOV = 90.0f;
+	float zNear = 0.1f;
+	float zFar = 1.0f;
+	////////////////////////////////////
+
 	void setBaseColor(float r, float g, float b, float a);
 	void initializeWindow(HWND hwnd);
-	void initializeTriangle(float x, float y, float z, float r, float g, float b, float a);
+	void initializeTriangle(Triangle triangle);
+	void initializeLine(Line line);
 
 public:
 
@@ -41,4 +69,5 @@ public:
 	void Shutdown();
 	void setDeltaTime(float t);
 
+	//XMMATRIX buildProjectionMatrix();
 };
