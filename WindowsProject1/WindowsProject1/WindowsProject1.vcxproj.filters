@@ -36,6 +36,21 @@
     <ClInclude Include="XTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tex1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tex2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tex3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tex4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -50,6 +65,9 @@
     <ClCompile Include="XTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WindowsProject1.rc">
@@ -61,6 +79,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="WindowsProject1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="deWey.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

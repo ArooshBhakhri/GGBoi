@@ -28,16 +28,16 @@ private:
 	//Shapes//////////////////
 	MY_VERTEX vertices[8] =
 	{
-				  //x		y			z			r			g			b			a
-		MY_VERTEX(-0.25f,	0.25f,		0.0f,		1.0f,		0.0f,		0.0f,		1.0f),		//top left				0
-		MY_VERTEX(0.25f,	0.25f,		0.0f,		0.0f,		1.0f,		0.0f,		1.0f),		//top right				1
-		MY_VERTEX(-0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		1.0f,		1.0f),		//bottom left			2
-		MY_VERTEX(0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		0.0f,		1.0f),		//bottom right			3
+				  //x		y			z			r			g			b			a		u		v
+		MY_VERTEX(-0.25f,	0.25f,		0.0f,		1.0f,		0.0f,		0.0f,		1.0f,	0,		0),		//top left				0
+		MY_VERTEX(0.25f,	0.25f,		0.0f,		0.0f,		1.0f,		0.0f,		1.0f,	1,		0),		//top right				1
+		MY_VERTEX(-0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		1.0f,		1.0f,	1,		0),		//bottom left			2
+		MY_VERTEX(0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		0.0f,		1.0f,	1,		1),		//bottom right			3
 		//////////////////////////////////////////////////////////////////////////////////////////////back verts below
-		MY_VERTEX(-0.25f,	0.25f,		0.25f,		1.0f,		1.0f,		0.0f,		1.0f),		//top left				4
-		MY_VERTEX(0.25f,	0.25f,		0.25f,		0.0f,		1.0f,		1.0f,		1.0f),		//top right				5
-		MY_VERTEX(-0.25f,	-0.25f,		0.25f,		1.0f,		0.0f,		1.0f,		1.0f),		//bottom left			6
-		MY_VERTEX(0.25f,	-0.25f,		0.25f,		1.0f,		1.0f,		1.0f,		1.0f),		//bottom right			7
+		MY_VERTEX(-0.25f,	0.25f,		0.25f,		1.0f,		1.0f,		0.0f,		1.0f,	0,		0),		//top left				4
+		MY_VERTEX(0.25f,	0.25f,		0.25f,		0.0f,		1.0f,		1.0f,		1.0f,	1,		0),		//top right				5
+		MY_VERTEX(-0.25f,	-0.25f,		0.25f,		1.0f,		0.0f,		1.0f,		1.0f,	1,		0),		//bottom left			6
+		MY_VERTEX(0.25f,	-0.25f,		0.25f,		1.0f,		1.0f,		1.0f,		1.0f,	1,		1),		//bottom right			7
 	};
 
 	DWORD indices[36] =
@@ -67,7 +67,7 @@ private:
 	ID3D11Buffer *shaderBuffer;
 
 	//3D magic shit/////////////////////
-	ID3D11Buffer * cbPerObjectBuffer;
+	ID3D11Buffer *cbPerObjectBuffer;
 
 	cbPerObject cbPerObj;
 
@@ -89,6 +89,13 @@ private:
 	float zNear = 0.1f;
 	float zFar = 1000.0f;
 	////////////////////////////////////
+
+	//Textures!!/////////////////////////////
+	ID3D11Texture2D *diffuseTexture;
+	ID3D11Texture2D *envTexture;
+	ID3D11ShaderResourceView * envView;
+
+	/////////////////////////////////////////
 
 	void setBaseColor(float r, float g, float b, float a);
 	void initializeWindow(HWND hwnd);

@@ -14,10 +14,11 @@ struct MY_VERTEX
 {
 	XMFLOAT3 pos;
 	XMFLOAT4 rgba;
+	XMFLOAT2 texPos;
 
 	MY_VERTEX() {}
-	MY_VERTEX(float x, float y, float z, float r, float g, float b, float a)
-		: pos(x, y, z), rgba(r, g, b, a) {}
+	MY_VERTEX(float x, float y, float z, float r, float g, float b, float a, float u, float v)
+		: pos(x, y, z), rgba(r, g, b, a), texPos(u, v) {}
 };
 
 struct SEND_TO_RAM

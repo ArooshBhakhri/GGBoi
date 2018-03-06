@@ -15,11 +15,23 @@ void Game::Initialize(HWND hwnd)
 	D3D11_INPUT_ELEMENT_DESC vLayout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,	  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
 	//creating actual input layout
 	device->CreateInputLayout(vLayout, ARRAYSIZE(vLayout), Trivial_VS, sizeof(Trivial_VS), &layout);
+
+	//Load in textures
+
+#pragma region oldCode
+
+	HRESULT result = CreateDDSTextureFromFile(device, L"gg.dds", (ID3D11Resource**)&envTexture, &envView);
+
+
+#pragma endregion
+
+
 
 }
 
@@ -84,6 +96,33 @@ void Game::Update(float delta)
 		yTarget -= time.SmoothDelta();
 	}
 
+	if (GetAsyncKeyState('Z'))
+	{
+		zNear -= time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('X'))
+	{
+		zNear += time.SmoothDelta();
+	}
+
+	if (GetAsyncKeyState('C'))
+	{
+		zFar -= time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('V'))
+	{
+		zFar += time.SmoothDelta();
+	}
+
+	if (GetAsyncKeyState('B'))
+	{
+		verticalFOV -= time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('N'))
+	{
+		verticalFOV += time.SmoothDelta();
+	}
+
 #pragma endregion
 
 	camPosition = XMVectorSet(xPos, yPos, zPos, 0.0f);
@@ -100,7 +139,7 @@ void Game::Update(float delta)
 		cosf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,			sinf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,
 		0,									1,			0,															0,
 		-sinf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),	0,			cosf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,
-		0,									0,		0,															1
+		0,									0,		1.0f,															1
 	};
 
 	WVP = World * camView * camProjection;
@@ -129,6 +168,7 @@ void Game::Update(float delta)
 	device->CreateBuffer(&vsBuffer, &vsSubData, &cbPerObjectBuffer);
 
 	context->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+
 }
 
 void Game::Render()
@@ -136,6 +176,10 @@ void Game::Render()
 	
 	setBaseColor(0.0f, 0.0f, 0.0f, 1.0f);
 	context->ClearDepthStencilView(dStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	ID3D11ShaderResourceView* texSRV[] = { envView };
+
+	context->PSSetShaderResources(0, 1, texSRV);
 
 	//Drawing shapes///////////////////////////////////////////////////////
 
@@ -228,6 +272,7 @@ void Game::Shutdown()
 	safeRelease(shaderBuffer);
 
 	safeRelease(cbPerObjectBuffer);
+
 }
 
 void Game::setDeltaTime(float t)
