@@ -3,6 +3,8 @@
 void Game::Initialize(HWND hwnd)
 {
 
+	time.Restart();
+
 	initializeWindow(hwnd);
 
 	//creating pixel and vertex shader to use
@@ -27,6 +29,63 @@ void Game::Update(float delta)
 	if (delta != 0 && delta < deltaTime)
 		return;
 
+	time.Signal();
+
+#pragma region camControls
+
+	if (GetAsyncKeyState('W'))					//Move forward
+	{
+		zPos += time.SmoothDelta();
+		zTarget += time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('S'))				//Move back
+	{
+		zPos -= time.SmoothDelta();
+		zTarget -= time.SmoothDelta();
+	}
+
+	if (GetAsyncKeyState('A'))					//Move left
+	{
+		xPos -= time.SmoothDelta();
+		xTarget -= time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('D'))				//Move right
+	{
+		xPos += time.SmoothDelta();
+		xTarget += time.SmoothDelta();
+	}
+
+	if (GetAsyncKeyState('Q'))					//Move up
+	{
+		yPos += time.SmoothDelta();
+		yTarget += time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('E'))				//Move down
+	{
+		yPos -= time.SmoothDelta();
+		yTarget -= time.SmoothDelta();
+	}
+
+	if (GetAsyncKeyState('J'))					//Rotate left
+	{
+		xTarget -= time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('L'))				//Rotate right
+	{
+		xTarget += time.SmoothDelta();
+	}
+
+	if (GetAsyncKeyState('I'))					//Rotate up
+	{
+		yTarget += time.SmoothDelta();
+	}
+	else if (GetAsyncKeyState('K'))				//Rotate down
+	{
+		yTarget -= time.SmoothDelta();
+	}
+
+#pragma endregion
+
 	camPosition = XMVectorSet(xPos, yPos, zPos, 0.0f);
 	camTarget = XMVectorSet(xTarget, yTarget, zTarget, 0.0f);
 	camUp = XMVectorSet(xCam, yCam, zCam, 0.0f);
@@ -36,7 +95,13 @@ void Game::Update(float delta)
 
 	camView = XMMatrixLookAtLH(camPosition, camTarget, camUp);
 
-	World = XMMatrixIdentity();
+	World = 
+	{
+		cosf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,			sinf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,
+		0,									1,			0,															0,
+		-sinf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),	0,			cosf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,
+		0,									0,		0,															1
+	};
 
 	WVP = World * camView * camProjection;
 

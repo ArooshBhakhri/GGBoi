@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "XTime.h"
 #include <math.h>
 

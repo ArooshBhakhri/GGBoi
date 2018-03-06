@@ -2,11 +2,15 @@
 
 #include "stdafx.h"
 
+#include "XTime.h"
+
 class Game
 {
 	
 private:
 	float deltaTime = 0;
+
+	XTime time;
 
 	ID3D11Device * device;
 	IDXGISwapChain *swapChain;
@@ -36,7 +40,7 @@ private:
 		MY_VERTEX(0.25f,	-0.25f,		0.25f,		1.0f,		1.0f,		1.0f,		1.0f),		//bottom right			7
 	};
 
-	DWORD indices[24] =
+	DWORD indices[36] =
 	{
 		0, 1, 2,	//front - top
 		2, 1, 3,	//front - bottom
@@ -44,9 +48,12 @@ private:
 		3, 5, 7,	//right - bottom
 		7, 5, 4,	//back	- top
 		7, 4, 6,	//back  - bottom
-		4, 0, 6,	//left  - top
+		4, 0, 2,	//left  - top
 		6, 4, 2,	//left  - bottom
-
+		1, 4, 5,	//top   - top
+		1, 0, 4,	//top	- bottom
+		7, 6, 2,	//bottom - bottom
+		7, 2, 3
 	};
 
 	ID3D11Buffer *drawingBuffer;
@@ -78,9 +85,9 @@ private:
 
 	float aspectRatio = ((float)BACKBUFFER_WIDTH / (float)BACKBUFFER_HEIGHT);
 
-	float verticalFOV = 90.0f;
+	float verticalFOV = XMConvertToRadians(60.0f);
 	float zNear = 0.1f;
-	float zFar = 1.0f;
+	float zFar = 1000.0f;
 	////////////////////////////////////
 
 	void setBaseColor(float r, float g, float b, float a);
