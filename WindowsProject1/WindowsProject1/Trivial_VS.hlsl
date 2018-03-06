@@ -1,6 +1,7 @@
 cbuffer cbPerObject
 {
     float4x4 WVP;
+    float3 time;
 };
 
 struct OUTPUT_VERTEX
@@ -8,6 +9,7 @@ struct OUTPUT_VERTEX
     float4 Pos : SV_POSITION;
     float4 Color : COLOR;
     float2 Texture : TEXCOORD;
+    float3 time : TIMER;
 };
 
 struct INPUT_VERTEX
@@ -31,6 +33,8 @@ OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
 	// END PART 3
 
     sendToRasterizer.Texture = fromVertexBuffer.texCoord;
+
+    sendToRasterizer.time = time;
 
     return sendToRasterizer;
 }

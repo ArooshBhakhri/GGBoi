@@ -38,4 +38,5 @@ struct Line
 struct cbPerObject
 {
 	XMFLOAT4X4 WVP;
+	XMFLOAT3 time;
 };

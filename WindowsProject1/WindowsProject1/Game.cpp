@@ -139,19 +139,24 @@ void Game::Update(float delta)
 		cosf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,			sinf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,
 		0,									1,			0,															0,
 		-sinf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),	0,			cosf(XMConvertToRadians((float)time.TotalTime() * 40.0f)),		0,
-		0,									0,		1.0f,															1
+		0,									0,			5.0f,															1
 	};
 
 	WVP = World * camView * camProjection;
-
+	
 	XMStoreFloat4x4(&cbPerObj.WVP, WVP);
+	
+	XMVECTOR timeVar;
+	timeVar = XMVectorSet(time.Delta(), time.SmoothDelta(), time.TotalTime(), 0.0f);
+
+	XMStoreFloat3(&cbPerObj.time, timeVar);
 
 	D3D11_BUFFER_DESC vsBuffer;
 
 	ZeroMemory(&vsBuffer, sizeof(vsBuffer));
 
 	vsBuffer.Usage = D3D11_USAGE_DEFAULT;
-	vsBuffer.ByteWidth = sizeof(cbPerObj);
+	vsBuffer.ByteWidth = sizeof(cbPerObj) + 4;
 	vsBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	vsBuffer.CPUAccessFlags = 0;
 	vsBuffer.MiscFlags = 0;
@@ -160,7 +165,7 @@ void Game::Update(float delta)
 
 	ZeroMemory(&vsSubData, sizeof(vsSubData));
 
-	vsSubData.pSysMem = &cbPerObj.WVP;
+	vsSubData.pSysMem = &cbPerObj;
 	vsSubData.SysMemPitch = 0;
 	vsSubData.SysMemSlicePitch = 0;
 
@@ -180,6 +185,24 @@ void Game::Render()
 	ID3D11ShaderResourceView* texSRV[] = { envView };
 
 	context->PSSetShaderResources(0, 1, texSRV);
+
+	D3D11_SAMPLER_DESC samplerDesc;
+
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	safeRelease(sampler);
+	device->CreateSamplerState(&samplerDesc, &sampler);
+
+	//safeRelease(sampler);
+	context->PSSetSamplers(0, 1, &sampler);
 
 	//Drawing shapes///////////////////////////////////////////////////////
 
@@ -272,6 +295,11 @@ void Game::Shutdown()
 	safeRelease(shaderBuffer);
 
 	safeRelease(cbPerObjectBuffer);
+
+	safeRelease(diffuseTexture);
+	safeRelease(envTexture);
+	safeRelease(envView);
+	safeRelease(sampler);
 
 }
 

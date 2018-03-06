@@ -26,34 +26,71 @@ private:
 	float baseColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	//Shapes//////////////////
-	MY_VERTEX vertices[8] =
+	MY_VERTEX vertices[24] =
 	{
 				  //x		y			z			r			g			b			a		u		v
-		MY_VERTEX(-0.25f,	0.25f,		0.0f,		1.0f,		0.0f,		0.0f,		1.0f,	0,		0),		//top left				0
-		MY_VERTEX(0.25f,	0.25f,		0.0f,		0.0f,		1.0f,		0.0f,		1.0f,	1,		0),		//top right				1
-		MY_VERTEX(-0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		1.0f,		1.0f,	1,		0),		//bottom left			2
-		MY_VERTEX(0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		0.0f,		1.0f,	1,		1),		//bottom right			3
-		//////////////////////////////////////////////////////////////////////////////////////////////back verts below
-		MY_VERTEX(-0.25f,	0.25f,		0.25f,		1.0f,		1.0f,		0.0f,		1.0f,	0,		0),		//top left				4
-		MY_VERTEX(0.25f,	0.25f,		0.25f,		0.0f,		1.0f,		1.0f,		1.0f,	1,		0),		//top right				5
-		MY_VERTEX(-0.25f,	-0.25f,		0.25f,		1.0f,		0.0f,		1.0f,		1.0f,	1,		0),		//bottom left			6
-		MY_VERTEX(0.25f,	-0.25f,		0.25f,		1.0f,		1.0f,		1.0f,		1.0f,	1,		1),		//bottom right			7
+				  // Front Face
+		MY_VERTEX(-1.0f,	-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
+		MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f),
+		MY_VERTEX(1.0f,		-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f),
+
+		// Back Face
+		MY_VERTEX(-1.0f,	-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f),
+		MY_VERTEX(1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
+		MY_VERTEX(1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,	1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f),
+
+		// Top Face
+		MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
+		MY_VERTEX(-1.0f, 1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+		MY_VERTEX(1.0f, 1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+		MY_VERTEX(1.0f, 1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
+
+		// Bottom Face
+		MY_VERTEX(-1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
+		MY_VERTEX(1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
+		MY_VERTEX(1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+		MY_VERTEX(-1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+
+		// Left Face
+		MY_VERTEX(-1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
+		MY_VERTEX(-1.0f,  1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+		MY_VERTEX(-1.0f,  1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+		MY_VERTEX(-1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
+
+		// Right Face
+		MY_VERTEX(1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
+		MY_VERTEX(1.0f,  1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+		MY_VERTEX(1.0f,  1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+		MY_VERTEX(1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f)
 	};
 
 	DWORD indices[36] =
 	{
-		0, 1, 2,	//front - top
-		2, 1, 3,	//front - bottom
-		3, 1, 5,	//right - top
-		3, 5, 7,	//right - bottom
-		7, 5, 4,	//back	- top
-		7, 4, 6,	//back  - bottom
-		4, 0, 2,	//left  - top
-		6, 4, 2,	//left  - bottom
-		1, 4, 5,	//top   - top
-		1, 0, 4,	//top	- bottom
-		7, 6, 2,	//bottom - bottom
-		7, 2, 3
+		// Front Face
+		0,  1,  2,
+		0,  2,  3,
+
+		// Back Face
+		4,  5,  6,
+		4,  6,  7,
+
+		// Top Face
+		8,  9, 10,
+		8, 10, 11,
+
+		// Bottom Face
+		12, 13, 14,
+		12, 14, 15,
+
+		// Left Face
+		16, 17, 18,
+		16, 18, 19,
+
+		// Right Face
+		20, 21, 22,
+		20, 22, 23
 	};
 
 	ID3D11Buffer *drawingBuffer;
@@ -94,6 +131,7 @@ private:
 	ID3D11Texture2D *diffuseTexture;
 	ID3D11Texture2D *envTexture;
 	ID3D11ShaderResourceView * envView;
+	ID3D11SamplerState *sampler;
 
 	/////////////////////////////////////////
 
