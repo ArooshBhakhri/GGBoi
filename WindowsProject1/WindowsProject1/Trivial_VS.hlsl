@@ -3,13 +3,6 @@ cbuffer cbPerObject
     float4x4 WVP;
 };
 
-cbuffer THIS_IS_VRAM : register(b0)
-{
-    float4 constantColor;
-    float3 constantOffset;
-    float2 padding;
-};
-
 struct OUTPUT_VERTEX
 {
     float4 Pos : SV_POSITION;
@@ -19,6 +12,7 @@ struct OUTPUT_VERTEX
 struct INPUT_VERTEX
 {
     float3 coordinate : POSITION;
+    float4 color : COLOR;
 };
 
 OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
@@ -28,11 +22,10 @@ OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
 
     sendToRasterizer.Pos.xyz = fromVertexBuffer.coordinate.xyz;
 
-	// TODO : PART 4 STEP 4
-    sendToRasterizer.Pos.xyz += constantOffset;
+    sendToRasterizer.Pos = mul(WVP, sendToRasterizer.Pos);
 
 	// TODO : PART 3 STEP 7
-    sendToRasterizer.Color = constantColor;
+    sendToRasterizer.Color = fromVertexBuffer.color;
 	// END PART 3
 
     return sendToRasterizer;

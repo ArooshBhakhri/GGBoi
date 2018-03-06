@@ -10,10 +10,14 @@
 using namespace DirectX;
 using namespace std;
 
-struct MY_VERTEX
+struct MY_VERTEX 
 {
 	XMFLOAT3 pos;
 	XMFLOAT4 rgba;
+
+	MY_VERTEX() {}
+	MY_VERTEX(float x, float y, float z, float r, float g, float b, float a)
+		: pos(x, y, z), rgba(r, g, b, a) {}
 };
 
 struct SEND_TO_RAM
@@ -21,13 +25,6 @@ struct SEND_TO_RAM
 	XMFLOAT4 constantColor;
 	XMFLOAT3 constantOffset;
 	XMFLOAT2 padding;
-};
-
-struct Triangle
-{
-	MY_VERTEX verts[3];
-	ID3D11Buffer* triangleBuffer;
-	SEND_TO_RAM triangleShader;
 };
 
 struct Line
@@ -39,5 +36,5 @@ struct Line
 
 struct cbPerObject
 {
-	XMMATRIX WVP;
+	XMFLOAT4X4 WVP;
 };

@@ -5,56 +5,6 @@ void Game::Initialize(HWND hwnd)
 
 	initializeWindow(hwnd);
 
-	///////////////////////////////////////////////////////////INITIALIZING SHAPES////////////////////////////////////////////////
-
-	//Shape1- Triangle/////////////////////////////////////////////////////////////////
-	Triangle tri1;
-	tri1.verts[0].pos.x = -0.25f;	tri1.verts[0].pos.y = 0.25f;	tri1.verts[0].pos.z = 0.0f;
-	tri1.verts[1].pos.x = 0.25f;	tri1.verts[1].pos.y = 0.25f;	tri1.verts[1].pos.z = 0.0f;
-	tri1.verts[2].pos.x = -0.25f;	tri1.verts[2].pos.y = -0.25f;	tri1.verts[2].pos.z = 0.0f;
-
-	tri1.triangleShader.constantColor = { 1.0f, 0.0f, 0.0f, 1.0f };
-	tri1.triangleShader.constantOffset = { 0.0f, 0.0f, 0.0f };
-	//tri1.triangleShader.padding = { 6.0f, 6.0f };
-
-	initializeTriangle(tri1);
-
-	Triangle tri2;
-	tri2.verts[0].pos.x = -0.25f;	tri2.verts[0].pos.y = -0.25f;	tri2.verts[0].pos.z = 0.0f;
-	tri2.verts[1].pos.x = 0.25f;	tri2.verts[1].pos.y = 0.25f;	tri2.verts[1].pos.z = 0.0f;
-	tri2.verts[2].pos.x = 0.25f;	tri2.verts[2].pos.y = -0.25f;	tri2.verts[2].pos.z = 0.0f;
-
-	tri2.triangleShader.constantColor = { 1.0f, 0.0f, 0.0f, 1.0f };
-	tri2.triangleShader.constantOffset = { 0.0f, 0.0f, 0.0f };
-	//tri2.triangleShader.padding = { 6.0f, 6.0f };
-
-	initializeTriangle(tri2);
-
-	Triangle tri3;
-	tri3.verts[0].pos.x = 0.25f;	tri3.verts[0].pos.y = 0.25f;	tri3.verts[0].pos.z = 0.0f;
-	tri3.verts[1].pos.x = 0.0f;		tri3.verts[1].pos.y = 0.25f;	tri3.verts[1].pos.z = 0.25f;
-	tri3.verts[2].pos.x = 0.25f;	tri3.verts[2].pos.y = -0.25f;	tri3.verts[2].pos.z = 0.0f;
-
-	tri3.triangleShader.constantColor = { 0.0f, 1.0f, 0.0f, 1.0f };
-	tri3.triangleShader.constantOffset = { 0.0f, 0.0f, 0.0f };
-	//tri3.triangleShader.padding = { 6.0f, 6.0f };
-
-	initializeTriangle(tri3);
-
-	//Triangle tri4;
-	//tri4.verts[0].pos.x = 0.50f;	tri4.verts[0].pos.y = -0.25f;	tri4.verts[0].pos.z = 0.5f;
-	//tri4.verts[1].pos.x = 0.0f;		tri4.verts[1].pos.y = -0.25f;	tri4.verts[1].pos.z = 0.5f;
-	//tri4.verts[2].pos.x = 0.25f;	tri4.verts[2].pos.y = 0.25f;	tri4.verts[2].pos.z = 0.5f;
-
-	//tri4.triangleShader.constantColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//tri4.triangleShader.constantOffset = { 0.0f, 0.0f, 0.0f };
-
-	//initializeTriangle(tri4);
-
-	//////////////////////////////////////////////////////////////////////////////////
-
-	///////////////////////////////////////////////////////////INITIALIZING SHAPES - END////////////////////////////////////////////////
-
 	//creating pixel and vertex shader to use
 	device->CreatePixelShader(Trivial_PS, sizeof(Trivial_PS), NULL, &pixelShader);
 	device->CreateVertexShader(Trivial_VS, sizeof(Trivial_VS), NULL, &vertexShader);
@@ -84,16 +34,36 @@ void Game::Update(float delta)
 	FLOAT yScale = 1.0f / tanf(0.5f * verticalFOV);
 	camProjection = XMMatrixPerspectiveFovLH(verticalFOV, aspectRatio, zNear, zFar);
 
+	camView = XMMatrixLookAtLH(camPosition, camTarget, camUp);
+
 	World = XMMatrixIdentity();
 
 	WVP = World * camView * camProjection;
 
-	cbPerObj.WVP = XMMatrixTranspose(WVP);
+	XMStoreFloat4x4(&cbPerObj.WVP, WVP);
 
-	context->UpdateSubresource(cbPerObjectBuffer, 0, NULL, &cbPerObj, 0, 0);
+	D3D11_BUFFER_DESC vsBuffer;
+
+	ZeroMemory(&vsBuffer, sizeof(vsBuffer));
+
+	vsBuffer.Usage = D3D11_USAGE_DEFAULT;
+	vsBuffer.ByteWidth = sizeof(cbPerObj);
+	vsBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	vsBuffer.CPUAccessFlags = 0;
+	vsBuffer.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA vsSubData;
+
+	ZeroMemory(&vsSubData, sizeof(vsSubData));
+
+	vsSubData.pSysMem = &cbPerObj.WVP;
+	vsSubData.SysMemPitch = 0;
+	vsSubData.SysMemSlicePitch = 0;
+
+	safeRelease(cbPerObjectBuffer);
+	device->CreateBuffer(&vsBuffer, &vsSubData, &cbPerObjectBuffer);
 
 	context->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
-
 }
 
 void Game::Render()
@@ -105,88 +75,66 @@ void Game::Render()
 	//Drawing shapes///////////////////////////////////////////////////////
 
 	//Triangles-
-	for (unsigned int i = 0; i < triangles.size(); i++)
-	{
-		D3D11_BUFFER_DESC describeShader;
-		describeShader.Usage = D3D11_USAGE_DYNAMIC;
-		describeShader.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		describeShader.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		describeShader.ByteWidth = (sizeof(SEND_TO_RAM) + 12);			///////////////////////////////////////////////////////////////////////////////////////////
-		describeShader.MiscFlags = 0;
 
-		D3D11_SUBRESOURCE_DATA shaderData;
-		shaderData.pSysMem = &triangles[i].triangleShader;
-		shaderData.SysMemPitch = 0;
-		shaderData.SysMemSlicePitch = 0;
+	context->VSSetShader(vertexShader, NULL, 0);
+	context->PSSetShader(pixelShader, NULL, 0);
 
-		safeRelease(shaderBuffer);
+	D3D11_BUFFER_DESC indexBufferDesc;
 
-		device->CreateBuffer(&describeShader, &shaderData, &shaderBuffer);
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
-		context->VSSetConstantBuffers(0, 1, &shaderBuffer);
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(DWORD) * ARRAYSIZE(indices);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
 
-		UINT stride = sizeof(MY_VERTEX);
-		UINT offset = 0;
+	D3D11_SUBRESOURCE_DATA indexBufferData;
 
-		context->VSSetShader(vertexShader, NULL, 0);
-		context->PSSetShader(pixelShader, NULL, 0);
+	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
 
-		context->IASetInputLayout(layout);
+	indexBufferData.pSysMem = indices;
+	indexBufferData.SysMemPitch = 0;
+	indexBufferData.SysMemSlicePitch = 0;
 
-		D3D11_MAPPED_SUBRESOURCE resource;
+	safeRelease(indexBuffer);
 
-		context->Map(shaderBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &resource);
-		memcpy(resource.pData, &triangles[i].triangleShader, sizeof(triangles[i].triangleShader));
-		context->Unmap(shaderBuffer, NULL);
+	device->CreateBuffer(&indexBufferDesc, &indexBufferData, &indexBuffer);
 
-		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-		context->IASetVertexBuffers((UINT)0, (UINT)1, &triangles[i].triangleBuffer, &stride, &offset);
+	D3D11_BUFFER_DESC drawingBufferDesc;
+	
+	ZeroMemory(&drawingBufferDesc, sizeof(drawingBufferDesc));
 
-		context->Draw(3, 0);
-	}
+	drawingBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	drawingBufferDesc.ByteWidth = sizeof(MY_VERTEX) * ARRAYSIZE(vertices);
+	drawingBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	drawingBufferDesc.CPUAccessFlags = 0;
+	drawingBufferDesc.MiscFlags = 0;
 
-	//Lines-
-	for (unsigned int i = 0; i < lines.size(); ++i)
-	{
-		D3D11_BUFFER_DESC describeShader;
-		describeShader.Usage = D3D11_USAGE_DYNAMIC;
-		describeShader.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		describeShader.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		describeShader.ByteWidth = (sizeof(SEND_TO_RAM));			///////////////////////////////////////////////////////////////////////////////////////////
-		describeShader.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA drawingBufferSubresource;
 
-		D3D11_SUBRESOURCE_DATA shaderData;
-		shaderData.pSysMem = &lines[i].lineShader;
-		shaderData.SysMemPitch = 0;
-		shaderData.SysMemSlicePitch = 0;
+	ZeroMemory(&drawingBufferSubresource, sizeof(drawingBufferSubresource));
 
-		safeRelease(shaderBuffer);
+	drawingBufferSubresource.pSysMem = vertices;
+	drawingBufferSubresource.SysMemPitch = 0;
+	drawingBufferSubresource.SysMemSlicePitch = 0;
 
-		device->CreateBuffer(&describeShader, &shaderData, &shaderBuffer);
+	safeRelease(drawingBuffer);
 
-		context->VSSetConstantBuffers(0, 1, &shaderBuffer);
+	device->CreateBuffer(&drawingBufferDesc, &drawingBufferSubresource, &drawingBuffer);
 
-		UINT stride = sizeof(MY_VERTEX);
-		UINT offset = 0;
+	UINT stride = sizeof(MY_VERTEX);
+	UINT offset = 0;
 
-		context->VSSetShader(vertexShader, NULL, 0);
-		context->PSSetShader(pixelShader, NULL, 0);
+	context->IASetVertexBuffers(0, 1, &drawingBuffer, &stride, &offset);
+	
+	context->IASetInputLayout(layout);
 
-		context->IASetInputLayout(layout);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		D3D11_MAPPED_SUBRESOURCE resource;
-
-		context->Map(shaderBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &resource);
-		memcpy(resource.pData, &lines[i].lineShader, sizeof(lines[i].lineShader));
-		context->Unmap(shaderBuffer, NULL);
-
-		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP);
-
-		context->IASetVertexBuffers((UINT)0, (UINT)1, &lines[i].lineBuffer, &stride, &offset);
-
-		context->Draw(2, 0);
-	}
+	context->DrawIndexed(ARRAYSIZE(indices), 0, 0);
 
 	//call this at end of case WM_PAINT
 	swapChain->Present(0, 0);
@@ -206,15 +154,8 @@ void Game::Shutdown()
 	safeRelease(dStencilView);
 	safeRelease(depthStencilTexture);
 
-	for (unsigned int i = 0; i < triangles.size(); i++)
-	{
-		safeRelease(triangles[i].triangleBuffer);
-	}
-
-	for (unsigned int i = 0; i < lines.size(); i++)
-	{
-		safeRelease(lines[i].lineBuffer);
-	}
+	safeRelease(drawingBuffer);
+	safeRelease(indexBuffer);
 
 	safeRelease(vertexShader);
 	safeRelease(pixelShader);
@@ -318,44 +259,4 @@ void Game::initializeWindow(HWND hwnd)
 	cbbd.CPUAccessFlags = 0;
 	cbbd.MiscFlags = 0;
 
-	device->CreateBuffer(&cbbd, NULL, &cbPerObjectBuffer);
-
-}
-
-void Game::initializeTriangle(Triangle triangle)
-{
-
-	D3D11_BUFFER_DESC describeTriangle;
-	describeTriangle.Usage = D3D11_USAGE_IMMUTABLE;
-	describeTriangle.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	describeTriangle.CPUAccessFlags = NULL;
-	describeTriangle.ByteWidth = sizeof(triangle.verts);
-	describeTriangle.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA triangleData;
-	triangleData.pSysMem = triangle.verts;
-	triangleData.SysMemPitch = 0;
-	triangleData.SysMemSlicePitch = 0;
-
-	device->CreateBuffer(&describeTriangle, &triangleData, &triangle.triangleBuffer);
-
-	triangles.push_back(triangle);
-}
-
-void Game::initializeLine(Line line)
-{
-	D3D11_BUFFER_DESC describeLine;
-	describeLine.Usage = D3D11_USAGE_IMMUTABLE;
-	describeLine.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	describeLine.CPUAccessFlags = NULL;
-	describeLine.ByteWidth = sizeof(line.verts);
-	describeLine.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA lineData;
-	lineData.pSysMem = line.verts;
-	lineData.SysMemPitch = 0;
-	lineData.SysMemSlicePitch = 0;
-
-	device->CreateBuffer(&describeLine, &lineData, &line.lineBuffer);
-	lines.push_back(line);
 }

@@ -22,8 +22,35 @@ private:
 	float baseColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	//Shapes//////////////////
-	vector<Triangle> triangles;
-	vector<Line> lines;
+	MY_VERTEX vertices[8] =
+	{
+				  //x		y			z			r			g			b			a
+		MY_VERTEX(-0.25f,	0.25f,		0.0f,		1.0f,		0.0f,		0.0f,		1.0f),		//top left				0
+		MY_VERTEX(0.25f,	0.25f,		0.0f,		0.0f,		1.0f,		0.0f,		1.0f),		//top right				1
+		MY_VERTEX(-0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		1.0f,		1.0f),		//bottom left			2
+		MY_VERTEX(0.25f,	-0.25f,		0.0f,		0.0f,		0.0f,		0.0f,		1.0f),		//bottom right			3
+		//////////////////////////////////////////////////////////////////////////////////////////////back verts below
+		MY_VERTEX(-0.25f,	0.25f,		0.25f,		1.0f,		1.0f,		0.0f,		1.0f),		//top left				4
+		MY_VERTEX(0.25f,	0.25f,		0.25f,		0.0f,		1.0f,		1.0f,		1.0f),		//top right				5
+		MY_VERTEX(-0.25f,	-0.25f,		0.25f,		1.0f,		0.0f,		1.0f,		1.0f),		//bottom left			6
+		MY_VERTEX(0.25f,	-0.25f,		0.25f,		1.0f,		1.0f,		1.0f,		1.0f),		//bottom right			7
+	};
+
+	DWORD indices[24] =
+	{
+		0, 1, 2,	//front - top
+		2, 1, 3,	//front - bottom
+		3, 1, 5,	//right - top
+		3, 5, 7,	//right - bottom
+		7, 5, 4,	//back	- top
+		7, 4, 6,	//back  - bottom
+		4, 0, 6,	//left  - top
+		6, 4, 2,	//left  - bottom
+
+	};
+
+	ID3D11Buffer *drawingBuffer;
+	ID3D11Buffer *indexBuffer;
 	///////////////////////////////////
 
 	//Shaders//////////////////////////
@@ -47,7 +74,7 @@ private:
 	XMVECTOR camUp;
 	float xPos = 0.0f		,yPos = 0.0f,		zPos = -0.5f;
 	float xTarget = 0.0f	,yTarget = 0.0f,	zTarget = 0.0f;
-	float xCam = 0.0f,		yCam = 0.0f,		zCam = 0.0f;
+	float xCam = 0.0f,		yCam = 1.0f,		zCam = 0.0f;
 
 	float aspectRatio = ((float)BACKBUFFER_WIDTH / (float)BACKBUFFER_HEIGHT);
 
@@ -58,8 +85,6 @@ private:
 
 	void setBaseColor(float r, float g, float b, float a);
 	void initializeWindow(HWND hwnd);
-	void initializeTriangle(Triangle triangle);
-	void initializeLine(Line line);
 
 public:
 
