@@ -7,6 +7,11 @@ void Game::Initialize(HWND hwnd)
 
 	initializeWindow(hwnd);
 
+	loadModel();
+
+	lightDir = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	lightColor = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
+
 	//creating pixel and vertex shader to use
 	device->CreatePixelShader(Trivial_PS, sizeof(Trivial_PS), NULL, &pixelShader);
 	device->CreateVertexShader(Trivial_VS, sizeof(Trivial_VS), NULL, &vertexShader);
@@ -16,22 +21,15 @@ void Game::Initialize(HWND hwnd)
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,	  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,	  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMALS", 0, DXGI_FORMAT_R32G32B32_FLOAT,  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
 	//creating actual input layout
 	device->CreateInputLayout(vLayout, ARRAYSIZE(vLayout), Trivial_VS, sizeof(Trivial_VS), &layout);
 
 	//Load in textures
-
-#pragma region oldCode
-
-	HRESULT result = CreateDDSTextureFromFile(device, L"gg.dds", (ID3D11Resource**)&envTexture, &envView);
-
-
-#pragma endregion
-
-
+	HRESULT result = CreateDDSTextureFromFile(device, L"bricks.dds", (ID3D11Resource**)&envTexture, &envView);
 
 }
 
@@ -150,17 +148,19 @@ void Game::Update(float delta)
 	timeVar = XMVectorSet(time.Delta(), time.SmoothDelta(), time.TotalTime(), 0.0f);
 
 	XMStoreFloat3(&cbPerObj.time, timeVar);
+	XMStoreFloat3(&cbPerObj.lightDir, lightDir);
+	XMStoreFloat4(&cbPerObj.lightColor, lightColor);
 
 	D3D11_BUFFER_DESC vsBuffer;
 
 	ZeroMemory(&vsBuffer, sizeof(vsBuffer));
 
 	vsBuffer.Usage = D3D11_USAGE_DEFAULT;
-	vsBuffer.ByteWidth = sizeof(cbPerObj) + 4;
+	vsBuffer.ByteWidth = sizeof(cbPerObj) + 8;
 	vsBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	vsBuffer.CPUAccessFlags = 0;
 	vsBuffer.MiscFlags = 0;
-
+	
 	D3D11_SUBRESOURCE_DATA vsSubData;
 
 	ZeroMemory(&vsSubData, sizeof(vsSubData));
@@ -216,7 +216,7 @@ void Game::Render()
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(DWORD) * ARRAYSIZE(indices);
+	indexBufferDesc.ByteWidth = sizeof(DWORD) * 1674;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -240,7 +240,7 @@ void Game::Render()
 	ZeroMemory(&drawingBufferDesc, sizeof(drawingBufferDesc));
 
 	drawingBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	drawingBufferDesc.ByteWidth = sizeof(MY_VERTEX) * ARRAYSIZE(vertices);
+	drawingBufferDesc.ByteWidth = sizeof(MY_VERTEX) * 768/*ARRAYSIZE(vertices)*/;
 	drawingBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	drawingBufferDesc.CPUAccessFlags = 0;
 	drawingBufferDesc.MiscFlags = 0;
@@ -266,7 +266,7 @@ void Game::Render()
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	context->DrawIndexed(ARRAYSIZE(indices), 0, 0);
+	context->DrawIndexed(1674, 0, 0);
 
 	//call this at end of case WM_PAINT
 	swapChain->Present(0, 0);
@@ -296,7 +296,6 @@ void Game::Shutdown()
 
 	safeRelease(cbPerObjectBuffer);
 
-	safeRelease(diffuseTexture);
 	safeRelease(envTexture);
 	safeRelease(envView);
 	safeRelease(sampler);
@@ -333,7 +332,7 @@ void Game::initializeWindow(HWND hwnd)
 	scd.Windowed = true;
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-	scd.SampleDesc.Count = 1;
+	scd.SampleDesc.Count = 4;
 	scd.SampleDesc.Quality = 0;
 	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	scd.BufferDesc.Height = BACKBUFFER_HEIGHT;
@@ -370,7 +369,7 @@ void Game::initializeWindow(HWND hwnd)
 	dStencilTexDesc.MipLevels = 1;
 	dStencilTexDesc.ArraySize = 1;
 	dStencilTexDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	dStencilTexDesc.SampleDesc.Count = 1;
+	dStencilTexDesc.SampleDesc.Count = 4;
 	dStencilTexDesc.SampleDesc.Quality = 0;
 	dStencilTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	dStencilTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -396,5 +395,39 @@ void Game::initializeWindow(HWND hwnd)
 	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbbd.CPUAccessFlags = 0;
 	cbbd.MiscFlags = 0;
+
+}
+
+void Game::loadModel()
+{
+
+	vertices = new MY_VERTEX[768];
+
+	for (unsigned int i = 0; i < 768; i++)
+	{
+		//assigning vert pos
+		vertices[i].pos.x = test_pyramid_data[i].pos[0];
+		vertices[i].pos.y = test_pyramid_data[i].pos[1];
+		vertices[i].pos.z = test_pyramid_data[i].pos[2];
+
+		//assigning rgba
+		vertices[i].rgba = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+		//assigning uvs
+		vertices[i].texPos.x = test_pyramid_data[i].uvw[0];
+		vertices[i].texPos.y = test_pyramid_data[i].uvw[1];
+
+		//load normals
+		vertices[i].normals.x = test_pyramid_data[i].nrm[0];
+		vertices[i].normals.y = test_pyramid_data[i].nrm[1];
+		vertices[i].normals.z = test_pyramid_data[i].nrm[2];
+	}
+
+	indices = new DWORD[1674];
+
+	for (unsigned int i = 0; i < 1674; i++)
+	{
+		indices[i] = test_pyramid_indicies[i];
+	}
 
 }

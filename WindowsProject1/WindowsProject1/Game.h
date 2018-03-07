@@ -26,72 +26,76 @@ private:
 	float baseColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	//Shapes//////////////////
-	MY_VERTEX vertices[24] =
-	{
-				  //x		y			z			r			g			b			a		u		v
-				  // Front Face
-		MY_VERTEX(-1.0f,	-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
-		MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f),
-		MY_VERTEX(1.0f,		1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f),
-		MY_VERTEX(1.0f,		-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f),
+	MY_VERTEX *vertices;
+#pragma region cubeVerts
+	//{
+	//			  //x		y			z			r			g			b			a		u		v
+	//			  // Front Face
+	//	MY_VERTEX(-1.0f,	-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
+	//	MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f),
+	//	MY_VERTEX(1.0f,		1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f),
+	//	MY_VERTEX(1.0f,		-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f),
 
-		// Back Face
-		MY_VERTEX(-1.0f,	-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f),
-		MY_VERTEX(1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
-		MY_VERTEX(1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f),
-		MY_VERTEX(-1.0f,	1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f),
+	//	// Back Face
+	//	MY_VERTEX(-1.0f,	-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f),
+	//	MY_VERTEX(1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
+	//	MY_VERTEX(1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f),
+	//	MY_VERTEX(-1.0f,	1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f),
 
-		// Top Face
-		MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
-		MY_VERTEX(-1.0f, 1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
-		MY_VERTEX(1.0f, 1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
-		MY_VERTEX(1.0f, 1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
+	//	// Top Face
+	//	MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f),
+	//	MY_VERTEX(-1.0f, 1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+	//	MY_VERTEX(1.0f, 1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+	//	MY_VERTEX(1.0f, 1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
 
-		// Bottom Face
-		MY_VERTEX(-1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
-		MY_VERTEX(1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
-		MY_VERTEX(1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
-		MY_VERTEX(-1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+	//	// Bottom Face
+	//	MY_VERTEX(-1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
+	//	MY_VERTEX(1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
+	//	MY_VERTEX(1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+	//	MY_VERTEX(-1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
 
-		// Left Face
-		MY_VERTEX(-1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
-		MY_VERTEX(-1.0f,  1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
-		MY_VERTEX(-1.0f,  1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
-		MY_VERTEX(-1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
+	//	// Left Face
+	//	MY_VERTEX(-1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
+	//	MY_VERTEX(-1.0f,  1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+	//	MY_VERTEX(-1.0f,  1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+	//	MY_VERTEX(-1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f),
 
-		// Right Face
-		MY_VERTEX(1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
-		MY_VERTEX(1.0f,  1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
-		MY_VERTEX(1.0f,  1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
-		MY_VERTEX(1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f)
-	};
+	//	// Right Face
+	//	MY_VERTEX(1.0f, -1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 1.0f),
+	//	MY_VERTEX(1.0f,  1.0f, -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 0.0f, 0.0f),
+	//	MY_VERTEX(1.0f,  1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 0.0f),
+	//	MY_VERTEX(1.0f, -1.0f,  1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	 1.0f, 1.0f)
+	//};
+#pragma endregion
 
-	DWORD indices[36] =
-	{
-		// Front Face
-		0,  1,  2,
-		0,  2,  3,
+	DWORD *indices;
+#pragma region cubeIndices
+	//{
+	//	// Front Face
+	//	0,  1,  2,
+	//	0,  2,  3,
 
-		// Back Face
-		4,  5,  6,
-		4,  6,  7,
+	//	// Back Face
+	//	4,  5,  6,
+	//	4,  6,  7,
 
-		// Top Face
-		8,  9, 10,
-		8, 10, 11,
+	//	// Top Face
+	//	8,  9, 10,
+	//	8, 10, 11,
 
-		// Bottom Face
-		12, 13, 14,
-		12, 14, 15,
+	//	// Bottom Face
+	//	12, 13, 14,
+	//	12, 14, 15,
 
-		// Left Face
-		16, 17, 18,
-		16, 18, 19,
+	//	// Left Face
+	//	16, 17, 18,
+	//	16, 18, 19,
 
-		// Right Face
-		20, 21, 22,
-		20, 22, 23
-	};
+	//	// Right Face
+	//	20, 21, 22,
+	//	20, 22, 23
+	//};
+#pragma endregion
 
 	ID3D11Buffer *drawingBuffer;
 	ID3D11Buffer *indexBuffer;
@@ -128,10 +132,15 @@ private:
 	////////////////////////////////////
 
 	//Textures!!/////////////////////////////
-	ID3D11Texture2D *diffuseTexture;
 	ID3D11Texture2D *envTexture;
 	ID3D11ShaderResourceView * envView;
 	ID3D11SamplerState *sampler;
+
+	/////////////////////////////////////////
+
+	//Lighting///////////////////////////////
+	XMVECTOR lightDir;
+	XMVECTOR lightColor;
 
 	/////////////////////////////////////////
 
@@ -145,6 +154,6 @@ public:
 	void Render();
 	void Shutdown();
 	void setDeltaTime(float t);
+	void loadModel();
 
-	//XMMATRIX buildProjectionMatrix();
 };
