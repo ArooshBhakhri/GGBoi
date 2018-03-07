@@ -114,7 +114,8 @@ void Game::Update(float delta)
 
 	if (GetAsyncKeyState('B'))
 	{
-		verticalFOV -= time.SmoothDelta();
+		if(verticalFOV >= 0.1f)
+			verticalFOV -= time.SmoothDelta();
 	}
 	else if (GetAsyncKeyState('N'))
 	{
