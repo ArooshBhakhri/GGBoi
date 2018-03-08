@@ -26,7 +26,8 @@ private:
 	float baseColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	//Shapes//////////////////
-	MY_VERTEX *vertices;
+
+	vector<MY_VERTEX> vertices;
 #pragma region cubeVerts
 	//{
 	//			  //x		y			z			r			g			b			a		u		v
@@ -68,7 +69,7 @@ private:
 	//};
 #pragma endregion
 
-	DWORD *indices;
+	vector<int> indices;
 #pragma region cubeIndices
 	//{
 	//	// Front Face
@@ -126,7 +127,7 @@ private:
 
 	float aspectRatio = ((float)BACKBUFFER_WIDTH / (float)BACKBUFFER_HEIGHT);
 
-	float verticalFOV = XMConvertToRadians(60.0f);
+	float verticalFOV = XMConvertToRadians(90.0f);
 	float zNear = 0.1f;
 	float zFar = 1000.0f;
 	////////////////////////////////////
@@ -154,6 +155,8 @@ public:
 	void Render();
 	void Shutdown();
 	void setDeltaTime(float t);
-	void loadModel();
+	void loadPyramid();
+	void loadHouse();
+	void loadIOModel();
 
 };

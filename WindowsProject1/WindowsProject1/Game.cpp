@@ -7,7 +7,9 @@ void Game::Initialize(HWND hwnd)
 
 	initializeWindow(hwnd);
 
-	loadModel();
+	//loadPyramid();
+
+	loadIOModel();
 
 	lightDir = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	lightColor = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
@@ -26,10 +28,10 @@ void Game::Initialize(HWND hwnd)
 	};
 
 	//creating actual input layout
-	device->CreateInputLayout(vLayout, ARRAYSIZE(vLayout), Trivial_VS, sizeof(Trivial_VS), &layout);
+	HRESULT result1 = device->CreateInputLayout(vLayout, ARRAYSIZE(vLayout), Trivial_VS, sizeof(Trivial_VS), &layout);
 
 	//Load in textures
-	HRESULT result = CreateDDSTextureFromFile(device, L"bricks.dds", (ID3D11Resource**)&envTexture, &envView);
+	HRESULT result = CreateDDSTextureFromFile(device, L"gg.dds", (ID3D11Resource**)&envTexture, &envView);
 
 }
 
@@ -45,24 +47,24 @@ void Game::Update(float delta)
 
 	if (GetAsyncKeyState('W'))					//Move forward
 	{
-		zPos += time.SmoothDelta();
-		zTarget += time.SmoothDelta();
+		zPos += time.SmoothDelta() * 25;
+		zTarget += time.SmoothDelta() * 25;
 	}
 	else if (GetAsyncKeyState('S'))				//Move back
 	{
-		zPos -= time.SmoothDelta();
-		zTarget -= time.SmoothDelta();
+		zPos -= time.SmoothDelta() * 25;
+		zTarget -= time.SmoothDelta() * 25;
 	}
 
 	if (GetAsyncKeyState('A'))					//Move left
 	{
-		xPos -= time.SmoothDelta();
-		xTarget -= time.SmoothDelta();
+		xPos -= time.SmoothDelta() * 25;
+		xTarget -= time.SmoothDelta() * 25;
 	}
 	else if (GetAsyncKeyState('D'))				//Move right
 	{
-		xPos += time.SmoothDelta();
-		xTarget += time.SmoothDelta();
+		xPos += time.SmoothDelta() * 25;
+		xTarget += time.SmoothDelta() * 25;
 	}
 
 	if (GetAsyncKeyState('Q'))					//Move up
@@ -202,7 +204,6 @@ void Game::Render()
 	safeRelease(sampler);
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	//safeRelease(sampler);
 	context->PSSetSamplers(0, 1, &sampler);
 
 	//Drawing shapes///////////////////////////////////////////////////////
@@ -217,7 +218,7 @@ void Game::Render()
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(DWORD) * 1674;
+	indexBufferDesc.ByteWidth = sizeof(int) * indices.size();
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -226,7 +227,7 @@ void Game::Render()
 
 	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
 
-	indexBufferData.pSysMem = indices;
+	indexBufferData.pSysMem = indices.data();
 	indexBufferData.SysMemPitch = 0;
 	indexBufferData.SysMemSlicePitch = 0;
 
@@ -241,7 +242,7 @@ void Game::Render()
 	ZeroMemory(&drawingBufferDesc, sizeof(drawingBufferDesc));
 
 	drawingBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	drawingBufferDesc.ByteWidth = sizeof(MY_VERTEX) * 768/*ARRAYSIZE(vertices)*/;
+	drawingBufferDesc.ByteWidth = sizeof(MY_VERTEX) * vertices.size();
 	drawingBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	drawingBufferDesc.CPUAccessFlags = 0;
 	drawingBufferDesc.MiscFlags = 0;
@@ -250,7 +251,7 @@ void Game::Render()
 
 	ZeroMemory(&drawingBufferSubresource, sizeof(drawingBufferSubresource));
 
-	drawingBufferSubresource.pSysMem = vertices;
+	drawingBufferSubresource.pSysMem = vertices.data();
 	drawingBufferSubresource.SysMemPitch = 0;
 	drawingBufferSubresource.SysMemSlicePitch = 0;
 
@@ -267,7 +268,7 @@ void Game::Render()
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	context->DrawIndexed(1674, 0, 0);
+	context->DrawIndexed(indices.size(), 0, 0);
 
 	//call this at end of case WM_PAINT
 	swapChain->Present(0, 0);
@@ -387,48 +388,362 @@ void Game::initializeWindow(HWND hwnd)
 
 	//setting up 3D shit
 
-	D3D11_BUFFER_DESC cbbd;
+	//D3D11_BUFFER_DESC cbbd;
 
-	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+	//ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
-	cbbd.Usage = D3D11_USAGE_DEFAULT;
-	cbbd.ByteWidth = sizeof(cbPerObject);
-	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbbd.CPUAccessFlags = 0;
-	cbbd.MiscFlags = 0;
+	//cbbd.Usage = D3D11_USAGE_DEFAULT;
+	//cbbd.ByteWidth = sizeof(cbPerObject);
+	//cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	//cbbd.CPUAccessFlags = 0;
+	//cbbd.MiscFlags = 0;
 
 }
 
-void Game::loadModel()
+//input 1 for pyramid, 2 for house
+void Game::loadPyramid()
 {
 
-	vertices = new MY_VERTEX[768];
+	vertices.resize(numPyramidVerts);
 
-	for (unsigned int i = 0; i < 768; i++)
+	for (unsigned int i = 0; i < numPyramidVerts; i++)
 	{
 		//assigning vert pos
-		vertices[i].pos.x = test_pyramid_data[i].pos[0];
-		vertices[i].pos.y = test_pyramid_data[i].pos[1];
-		vertices[i].pos.z = test_pyramid_data[i].pos[2];
+		vertices[i].pos.x = pyramidData[i].pos[0];
+		vertices[i].pos.y = pyramidData[i].pos[1];
+		vertices[i].pos.z = pyramidData[i].pos[2];
 
 		//assigning rgba
 		vertices[i].rgba = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		//assigning uvs
-		vertices[i].texPos.x = test_pyramid_data[i].uvw[0];
-		vertices[i].texPos.y = test_pyramid_data[i].uvw[1];
+		vertices[i].texPos.x = pyramidData[i].uvw[0];
+		vertices[i].texPos.y = pyramidData[i].uvw[1];
 
 		//load normals
-		vertices[i].normals.x = test_pyramid_data[i].nrm[0];
-		vertices[i].normals.y = test_pyramid_data[i].nrm[1];
-		vertices[i].normals.z = test_pyramid_data[i].nrm[2];
+		vertices[i].normals.x = pyramidData[i].nrm[0];
+		vertices[i].normals.y = pyramidData[i].nrm[1];
+		vertices[i].normals.z = pyramidData[i].nrm[2];
 	}
 
-	indices = new DWORD[1674];
+	indices.resize(numPyramidIndices);
 
-	for (unsigned int i = 0; i < 1674; i++)
+	for (unsigned int i = 0; i < numPyramidIndices; i++)
 	{
-		indices[i] = test_pyramid_indicies[i];
+		indices[i] = pyramidIndices[i];
 	}
 
+}
+
+void Game::loadIOModel()
+{
+	ifstream objFile;
+
+	objFile.open("House2.obj");
+
+	if (objFile.is_open())
+	{
+
+		char checker;
+
+		vector<XMFLOAT3> position;
+		vector<XMFLOAT2> texturePos;
+		vector<XMFLOAT3> normals;
+		vector<MY_TRIANGLE> triangles;
+
+		while (objFile)
+		{
+
+			checker = objFile.get();
+
+			switch (checker)
+			{
+			case '#':
+				while (checker != '#')
+				{
+					checker = objFile.get();
+				}
+				break;
+
+			case 'v':
+				checker = objFile.get();
+				if (checker == ' ')
+				{
+					float x, y, z;
+					objFile >> x >> y >> z;
+
+					XMFLOAT3 pushThis;
+					pushThis = { x, y, z };
+					position.push_back(pushThis);
+				}
+				else if (checker == 't')
+				{
+					float u, v;
+					objFile >> u >> v;
+
+					XMFLOAT2 pushThis;
+					pushThis = { u, v };
+					texturePos.push_back(pushThis);
+				}
+				else if(checker == 'n')
+				{
+					float x, y, z;
+					objFile >> x >> y >> z;
+
+					XMFLOAT3 pushThis;
+					pushThis = { x, y, z };
+					normals.push_back(pushThis);
+				}
+				break;
+
+			case'f':
+				checker = objFile.get();
+				if (checker == ' ')
+				{
+					string line;
+					getline(objFile, line);
+					
+					unsigned int s1Index = 0;
+					unsigned int s2Index = 0;
+
+					for (unsigned int i = 0; i < line.size(); i++)
+					{
+						if (line[i] == ' ' && s1Index == 0)
+							s1Index = i;
+						else if (line[i] == ' ')
+						{
+							s2Index = i;
+							break;
+						}
+					}
+
+					string face1;
+					string face2;
+					string face3;
+					
+					for (unsigned int i = 0; i < s1Index; i++)
+					{
+						face1.push_back(line[i]);
+					}
+
+					for (unsigned int i = s1Index; i < s2Index; i++)
+					{
+						face2.push_back(line[i]);
+					}
+
+					for (unsigned int i = s2Index; i < line.size(); i++)
+					{
+						face3.push_back(line[i]);
+					}
+					
+					string value1;
+					string value2;
+					string value3;
+
+					s1Index = 0;
+
+					for (unsigned int i = 0; i < face1.size(); i++)
+					{
+						if (face1[i] == '/' && s1Index == 0)
+							s1Index = i;
+						else if (face1[i] == '/')
+						{
+							s2Index = i;
+							break;
+						}
+					}
+
+					for (unsigned int i = 0; i < s1Index; i++)
+					{
+						value1.push_back(face1[i]);
+					}
+
+					for (unsigned int i = s1Index + 1; i < s2Index; i++)
+					{
+						value2.push_back(face1[i]);
+					}
+
+					for (unsigned int i = s2Index + 1; i < face1.size(); i++)
+					{
+						value3.push_back(face1[i]);
+					}
+
+
+					float v1 = stof(value1.c_str());
+					float v2 = stof(value2.c_str());
+					float v3 = stof(value3.c_str());
+
+					MY_TRIANGLE pushThis;
+					pushThis.indices = { (int)v1, (int)v2, (int)v3 };
+
+			/*		bool match = false;
+					for (unsigned int i = 0; i < triangles.size(); i++)
+					{
+						if (triangles[i] == pushThis)
+						{
+							match = true;
+							break;
+						}
+					}
+					if (!match)*/
+						triangles.push_back(pushThis);
+
+					string value11;
+					string value12;
+					string value13;
+
+					s1Index = 0;
+
+					for (unsigned int i = 0; i < face2.size(); i++)
+					{
+						if (face2[i] == '/' && s1Index == 0)
+							s1Index = i;
+						else if (face2[i] == '/')
+						{
+							s2Index = i;
+							break;
+						}
+					}
+
+					for (unsigned int i = 0; i < s1Index; i++)
+					{
+						value11.push_back(face2[i]);
+					}
+
+					for (unsigned int i = s1Index + 1; i < s2Index; i++)
+					{
+						value12.push_back(face2[i]);
+					}
+
+					for (unsigned int i = s2Index + 1; i < face2.size(); i++)
+					{
+						value13.push_back(face2[i]);
+					}
+
+					float v11 = stof(value11.c_str());
+					float v12 = stof(value12.c_str());
+					float v13 = stof(value13.c_str());
+
+					MY_TRIANGLE pushThis1;
+					pushThis1.indices = { (int)v11, (int)v12, (int)v13 };
+
+					/*match = false;
+					for (unsigned int i = 0; i < triangles.size(); i++)
+					{
+						if (triangles[i] == pushThis1)
+						{
+							match = true;
+							break;
+						}
+					}
+					if (!match)*/
+						triangles.push_back(pushThis1);
+
+					string value21;
+					string value22;
+					string value23;
+
+					s1Index = 0;
+
+					for (unsigned int i = 0; i < face3.size(); i++)
+					{
+						if (face3[i] == '/' && s1Index == 0)
+							s1Index = i;
+						else if (face3[i] == '/')
+						{
+							s2Index = i;
+							break;
+						}
+					}
+
+					for (unsigned int i = 0; i < s1Index; i++)
+					{
+						value21.push_back(face3[i]);
+					}
+
+					for (unsigned int i = s1Index + 1; i < s2Index; i++)
+					{
+						value22.push_back(face3[i]);
+					}
+
+					for (unsigned int i = s2Index + 1; i < face3.size(); i++)
+					{
+						value23.push_back(face3[i]);
+					}
+
+					float v21 = stof(value21.c_str());
+					float v22 = stof(value22.c_str());
+					float v23 = stof(value23.c_str());
+
+					MY_TRIANGLE pushThis2;
+					pushThis2.indices = { (int)v21, (int)v22, (int)v23 };
+
+					/*match = false;
+					for (unsigned int i = 0; i < triangles.size(); i++)
+					{
+						if (triangles[i] == pushThis2)
+						{
+							match = true;
+							break;
+						}
+					}
+					if (!match)*/
+						triangles.push_back(pushThis2);
+
+				}
+				break;
+
+			default:
+				break;
+			}
+
+		}
+
+		//float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+		for (unsigned int i = 0; i < position.size(); i++)
+		{
+			MY_VERTEX pushThis;
+
+			//assign position
+			pushThis.pos = position[i];
+
+			//assign normals
+			//pushThis.normals = normals[triangles[i].indices.y - 1];
+
+			//assign uvs
+			pushThis.texPos = texturePos[triangles[i].indices.z - 1];
+			
+			//assign random color
+			float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			pushThis.rgba = { r, g, b, 1.0f };
+
+			vertices.push_back(pushThis);
+		}
+
+		for (unsigned int i = 0; i < triangles.size(); i++)
+		{
+			bool match = false;
+			unsigned int matchIndex = 0;
+			for (unsigned int j = 0; j < indices.size(); j++)
+			{
+				if (triangles[i] == triangles[j] && i != j)
+				{
+					match = true;
+					matchIndex = j;
+					break;
+				}
+			}
+
+			if (match)
+			{
+				indices.push_back(matchIndex);
+			}
+			else
+				indices.push_back(i);
+		}
+
+	}
 }

@@ -24,5 +24,6 @@ float4 main( INPUT gg ) : SV_TARGET
 {
     float lightRatio = clamp(dot(-1 * gg.lightDir, gg.Normals), 0, 1);
 
-    return /*lightRatio * gg.lightColor **/baseTexture.Sample(envFilter, gg.Texture) * map(cos(gg.time.b), -1.0f, 1.0f, 0.1f, 1.0f);
+    //return /*lightRatio * gg.lightColor * */baseTexture.Sample(envFilter, gg.Texture) * map(cos(gg.time.b), -1.0f, 1.0f, 0.1f, 1.0f);
+    return gg.Color;
 }
