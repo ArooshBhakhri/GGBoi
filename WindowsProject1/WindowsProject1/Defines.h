@@ -38,7 +38,6 @@ struct MY_VERTEX
 		this->texPos = rhs.texPos;
 		this->normals = rhs.normals;
 	}
-
 };
 
 struct MY_TRIANGLE
@@ -59,4 +58,34 @@ struct cbPerObject
 	XMFLOAT3 time;
 	XMFLOAT3 lightDir;
 	XMFLOAT4 lightColor;
+};
+
+struct geometry
+{
+	XMMATRIX matrix;
+	//vertex shader stuff//////////////////////////
+	D3D11_BUFFER_DESC vertexBuffer;
+	D3D11_SUBRESOURCE_DATA vertexBufferSubData;
+	ID3D11VertexShader *vertexShader;
+	///////////////////////////////////////////////
+
+	//pixel shader stuff////////////////////////////
+	ID3D11ShaderResourceView* textureSRV;
+	ID3D11PixelShader *pixelShader;
+	////////////////////////////////////////////////
+
+	//index buffer stuff///////////////////////////
+	D3D11_BUFFER_DESC indexBuffer;
+	D3D11_SUBRESOURCE_DATA indexBufferSubData;
+	////////////////////////////////////////////////
+	
+	bool rotateY = false;
+
+	D3D11_PRIMITIVE_TOPOLOGY topology;
+
+	void* pixelShaderData;
+	void* trivialShaderData;
+
+	vector<MY_VERTEX> vertices;
+	vector<unsigned int> indices;
 };

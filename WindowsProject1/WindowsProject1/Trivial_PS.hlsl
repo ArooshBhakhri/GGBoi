@@ -20,10 +20,10 @@ float map(float value, float inMin, float inMax, float outMin, float outMax)
     return per * (outMax - outMin) + outMin;
 }
 
-float4 main( INPUT gg ) : SV_TARGET
+float4 main( INPUT inData ) : SV_TARGET
 {
-    float lightRatio = clamp(dot(-1 * gg.lightDir, gg.Normals), 0, 1);
+    float lightRatio = clamp(dot(-1 * inData.lightDir, inData.Normals), 0, 1);
 
-    //return /*lightRatio * gg.lightColor * */baseTexture.Sample(envFilter, gg.Texture) * map(cos(gg.time.b), -1.0f, 1.0f, 0.1f, 1.0f);
-    return gg.Color;
+    return /*lightRatio * inData.lightColor * */baseTexture.Sample(envFilter, inData.Texture) /* * map(cos(inData.time.b), -1.0f, 1.0f, 0.1f, 1.0f)*/;
+    //return abs(lightRatio) * abs(inData.lightColor) * inData.Color;
 }

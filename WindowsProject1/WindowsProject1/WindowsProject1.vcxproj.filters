@@ -36,18 +36,6 @@
     <ClInclude Include="XTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tex1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tex2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tex3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tex4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DDSTextureLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -87,9 +75,6 @@
     <Image Include="WindowsProject1.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="deWey.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Trivial_PS.hlsl">
@@ -98,7 +83,13 @@
     <FxCompile Include="Trivial_VS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="My_VS.hlsl">
+    <FxCompile Include="Skybox_VS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Skybox_PS.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Basic_PS.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

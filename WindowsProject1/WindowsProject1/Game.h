@@ -27,7 +27,6 @@ private:
 
 	//Shapes//////////////////
 
-	vector<MY_VERTEX> vertices;
 #pragma region cubeVerts
 	//{
 	//			  //x		y			z			r			g			b			a		u		v
@@ -69,7 +68,6 @@ private:
 	//};
 #pragma endregion
 
-	vector<int> indices;
 #pragma region cubeIndices
 	//{
 	//	// Front Face
@@ -98,13 +96,13 @@ private:
 	//};
 #pragma endregion
 
-	ID3D11Buffer *drawingBuffer;
+	vector<geometry> geometries;
+
+	ID3D11Buffer *vertexBuffer;
 	ID3D11Buffer *indexBuffer;
 	///////////////////////////////////
 
 	//Shaders//////////////////////////
-	ID3D11VertexShader *vertexShader;
-	ID3D11PixelShader *pixelShader;
 	ID3D11InputLayout *layout;
 	ID3D11Buffer *shaderBuffer;
 
@@ -121,8 +119,8 @@ private:
 	XMVECTOR camPosition;
 	XMVECTOR camTarget;
 	XMVECTOR camUp;
-	float xPos = 0.0f		,yPos = 0.0f,		zPos = -0.5f;
-	float xTarget = 0.0f	,yTarget = 0.0f,	zTarget = 0.0f;
+	float xPos = 1.0f		,yPos = 0.0f,		zPos = -0.5f;
+	float xTarget = 1.0f	,yTarget = 0.0f,	zTarget = 0.0f;
 	float xCam = 0.0f,		yCam = 1.0f,		zCam = 0.0f;
 
 	float aspectRatio = ((float)BACKBUFFER_WIDTH / (float)BACKBUFFER_HEIGHT);
@@ -134,7 +132,7 @@ private:
 
 	//Textures!!/////////////////////////////
 	ID3D11Texture2D *envTexture;
-	ID3D11ShaderResourceView * envView;
+	ID3D11ShaderResourceView * deWeySRV;
 	ID3D11SamplerState *sampler;
 
 	/////////////////////////////////////////
@@ -142,6 +140,26 @@ private:
 	//Lighting///////////////////////////////
 	XMVECTOR lightDir;
 	XMVECTOR lightColor;
+
+	/////////////////////////////////////////
+
+	//Skybox/////////////////////////////////
+	XMMATRIX skybox;
+	ID3D11Texture2D *skyboxTexture;
+	ID3D11Buffer* skyboxIndexBuffer;
+	ID3D11Buffer* skyboxVertexBuffer;
+	ID3D11VertexShader* Skybox_VShader;
+	ID3D11PixelShader* Skybox_PShader;
+
+	ID3D11ShaderResourceView* skyboxSRV;
+
+	ID3D11DepthStencilState* skyboxDSS;
+	ID3D11RasterizerState* skyboxRS;
+
+	unsigned int numSphereVerts;
+	unsigned int numSphereFaces;
+
+	XMMATRIX sphere;
 
 	/////////////////////////////////////////
 
@@ -155,8 +173,8 @@ public:
 	void Render();
 	void Shutdown();
 	void setDeltaTime(float t);
-	void loadPyramid();
-	void loadHouse();
-	void loadIOModel();
+	void loadPyramid(const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse);
+	void loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse);
+	void CreateSphere(unsigned int latLines, unsigned int longLines);
 
 };
