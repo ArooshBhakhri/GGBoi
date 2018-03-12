@@ -9,7 +9,8 @@ void Game::Initialize(HWND hwnd)
 
 
 	lightDir = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-	lightColor = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
+	//yellow
+	lightColor = XMVectorSet(0.956f, 0.921f, 0.258f, 0.0f);
 
 	//describing input layout for our position to GPU
 	D3D11_INPUT_ELEMENT_DESC vLayout[] =
@@ -111,7 +112,7 @@ void Game::Initialize(HWND hwnd)
 		20, 22, 23
 	};
 
-	for (unsigned int i = 0; i < ARRAYSIZE(indexes); i++)
+	for (int i = ARRAYSIZE(indexes) - 1; i > -1 ; i--)
 	{
 		cube.indices.push_back(indexes[i]);
 	}
@@ -119,7 +120,7 @@ void Game::Initialize(HWND hwnd)
 	device->CreateVertexShader(Trivial_VS, sizeof(Trivial_VS), NULL, &cube.vertexShader);
 	device->CreatePixelShader(Skybox_PS, sizeof(Skybox_PS), NULL, &cube.pixelShader);
 
-	cube.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	cube.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	cube.textureSRV = skyboxSRV;
 
@@ -134,10 +135,6 @@ void Game::Initialize(HWND hwnd)
 
 	//loadIOModel("Arch.obj", Basic_PS, sizeof(Basic_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
 
-	//geometries[1].rotateY = true;
-	//geometries[2].rotateY = true;
-
-	//CreateSphere(10, 10);
 }
 
 void Game::Update(float delta)

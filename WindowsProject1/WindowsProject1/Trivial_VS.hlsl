@@ -42,6 +42,8 @@ OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
 
     sendToRasterizer.time = time;
 
+    sendToRasterizer.Normals = fromVertexBuffer.normals;
+
     sendToRasterizer.lightColor = lightColor;
 
     sendToRasterizer.lightDir = lightDir;
