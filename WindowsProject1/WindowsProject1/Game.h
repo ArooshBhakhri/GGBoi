@@ -116,12 +116,20 @@ private:
 	XMMATRIX camView;
 	XMMATRIX camProjection;
 
+	XMMATRIX camRotation;
+	XMVECTOR defForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	XMVECTOR defRight = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+	XMVECTOR camForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	XMVECTOR camRight = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+
 	XMVECTOR camPosition;
 	XMVECTOR camTarget;
 	XMVECTOR camUp;
-	float xPos = 1.0f		,yPos = 0.0f,		zPos = -0.5f;
-	float xTarget = 1.0f	,yTarget = 0.0f,	zTarget = 0.0f;
+	float xPos = 0.5f		,yPos = 0.0f,		zPos = -3.0f;
+	float xTarget = 0.0f	,yTarget = 0.0f,	zTarget = 0.0f;
 	float xCam = 0.0f,		yCam = 1.0f,		zCam = 0.0f;
+
+	float moveSpeed = 10.0f;
 
 	float aspectRatio = ((float)BACKBUFFER_WIDTH / (float)BACKBUFFER_HEIGHT);
 
@@ -133,6 +141,14 @@ private:
 	//Textures!!/////////////////////////////
 	ID3D11Texture2D *envTexture;
 	ID3D11ShaderResourceView * deWeySRV;
+
+	ID3D11Texture2D *ironTexture;
+	ID3D11ShaderResourceView *ironSRV;
+
+	ID3D11Texture2D *trippyTexture;
+	ID3D11ShaderResourceView *trippySRV;
+
+	//one sampler for all shaders for now
 	ID3D11SamplerState *sampler;
 
 	/////////////////////////////////////////

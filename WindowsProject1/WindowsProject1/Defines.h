@@ -78,8 +78,6 @@ struct geometry
 	D3D11_BUFFER_DESC indexBuffer;
 	D3D11_SUBRESOURCE_DATA indexBufferSubData;
 	////////////////////////////////////////////////
-	
-	bool rotateY = false;
 
 	D3D11_PRIMITIVE_TOPOLOGY topology;
 

@@ -26,15 +26,116 @@ void Game::Initialize(HWND hwnd)
 	//Load in textures
 	CreateDDSTextureFromFile(device, L"bricks.dds", (ID3D11Resource**)&envTexture, &deWeySRV);
 	
-	CreateDDSTextureFromFile(device, L"SkyboxOcean.dds", (ID3D11Resource**)&skyboxTexture, &skyboxSRV);
+	CreateDDSTextureFromFile(device, L"Skybox.dds", (ID3D11Resource**)&skyboxTexture, &skyboxSRV);
 
-	loadPyramid(Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
+	CreateDDSTextureFromFile(device, L"iron.dds", (ID3D11Resource**)&ironTexture, &ironSRV);
+
+	CreateDDSTextureFromFile(device, L"trippy.dds", (ID3D11Resource**)&trippyTexture, &trippySRV);
+
+	//Create models
+	geometry cube;
+
+	//assigning cube verts
+	MY_VERTEX verts[] = 
+	{
+		//			x		y			z			r			g			b			a		u		v		nX		nY		nZ
+		// Front Face = bottom-left, top-left, top-right, bottom-right 
+		MY_VERTEX(-1.0f,	-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.66f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.75f,	0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.75f,	0.66f,	0.0f,	0.0f,	0.0f),
+
+		// Back Face
+		MY_VERTEX(-1.0f,	-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f,	0.66f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.50f,	0.66f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.50f,	0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,	1.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f,	0.33f,	0.0f,	0.0f,	0.0f),
+
+		// Top Face
+		MY_VERTEX(-1.0f,	1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f,	0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,    1.0f,	    1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f,	0.0f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,     1.0f,       1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.5017f,0.0f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,     1.0f,      -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.5017f,0.33f,	0.0f,	0.0f,	0.0f),
+
+		// Bottom Face
+		MY_VERTEX(-1.0f,   -1.0f,	   -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f, 1.0f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,    -1.0f,	   -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f, 0.66f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,    -1.0f,	    1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.50f, 0.66f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,   -1.0f,	    1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.50f, 1.0f,	0.0f,	0.0f,	0.0f),
+
+		// Left Face 
+		MY_VERTEX(-1.0f,   -1.0f,       1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f,  0.66f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,    1.0f,       1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.25f,  0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,    1.0f,      -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,   0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,   -1.0f,      -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,   0.66f,	0.0f,	0.0f,	0.0f),
+
+		// Right Face
+		MY_VERTEX(1.0f,		-1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.75f,	0.66f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		 1.0f,		-1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.75f,	0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		 1.0f,		 1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.50f,	0.33f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		-1.0f,		 1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.50f,	0.66f,	0.0f,	0.0f,	0.0f)
+	};
+
+	for (unsigned int i = 0; i < ARRAYSIZE(verts); i++)
+	{
+		MY_VERTEX v;
+		v = verts[i];
+		cube.vertices.push_back(v);
+	}
+
+	//assigning cube indexes
+	unsigned int indexes[] = 
+	{
+		// Front Face
+		0,  1,  2,
+		0,  2,  3,
+
+		// Back Face
+		4,  5,  6,
+		4,  6,  7,
+
+		// Top Face
+		8,  9, 10,
+		8, 10, 11,
+
+		// Bottom Face
+		12, 13, 14,
+		12, 14, 15,
+
+		// Left Face
+		16, 17, 18,
+		16, 18, 19,
+
+		// Right Face
+		20, 21, 22,
+		20, 22, 23
+	};
+
+	for (unsigned int i = 0; i < ARRAYSIZE(indexes); i++)
+	{
+		cube.indices.push_back(indexes[i]);
+	}
+
+	device->CreateVertexShader(Trivial_VS, sizeof(Trivial_VS), NULL, &cube.vertexShader);
+	device->CreatePixelShader(Skybox_PS, sizeof(Skybox_PS), NULL, &cube.pixelShader);
+
+	cube.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+
+	cube.textureSRV = skyboxSRV;
+
+	geometries.push_back(cube);
+
+	//Load models
+	loadPyramid(Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
+
+	loadPyramid(Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV);
 
 	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
 
 	//loadIOModel("Arch.obj", Basic_PS, sizeof(Basic_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
 
-	geometries[0].rotateY = true;
+	//geometries[1].rotateY = true;
+	//geometries[2].rotateY = true;
 
 	//CreateSphere(10, 10);
 }
@@ -51,53 +152,49 @@ void Game::Update(float delta)
 
 	if (GetAsyncKeyState('W'))					//Move forward
 	{
-		zPos += time.SmoothDelta() * 25;
-		zTarget += time.SmoothDelta() * 25;
+		zPos += time.SmoothDelta() * moveSpeed;
+		//zTarget += time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('S'))				//Move back
 	{
-		zPos -= time.SmoothDelta() * 25;
-		zTarget -= time.SmoothDelta() * 25;
+		zPos -= time.SmoothDelta() * moveSpeed;
+		//zTarget -= time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('A'))					//Move left
 	{
-		xPos -= time.SmoothDelta() * 25;
-		xTarget -= time.SmoothDelta() * 25;
+		xPos -= time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('D'))				//Move right
 	{
-		xPos += time.SmoothDelta() * 25;
-		xTarget += time.SmoothDelta() * 25;
+		xPos += time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('Q'))					//Move up
 	{
-		yPos += time.SmoothDelta();
-		yTarget += time.SmoothDelta();
+		yPos += time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('E'))				//Move down
 	{
-		yPos -= time.SmoothDelta();
-		yTarget -= time.SmoothDelta();
+		yPos -= time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('J'))					//Rotate left
 	{
-		xTarget -= time.SmoothDelta();
+		yTarget -= time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('L'))				//Rotate right
 	{
-		xTarget += time.SmoothDelta();
+		yTarget += time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('I'))					//Rotate up
 	{
-		yTarget += time.SmoothDelta();
+		xTarget -= time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('K'))				//Rotate down
 	{
-		yTarget -= time.SmoothDelta();
+		xTarget += time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('Z'))
@@ -130,14 +227,35 @@ void Game::Update(float delta)
 
 #pragma endregion
 
+#pragma region cameraStuff
+
 	camPosition = XMVectorSet(xPos, yPos, zPos, 0.0f);
-	camTarget = XMVectorSet(xTarget, yTarget, zTarget, 0.0f);
+
+	camRotation = XMMatrixRotationRollPitchYaw(xTarget, yTarget, 0);
+	camTarget = XMVector3TransformCoord(defForward, camRotation);
+	camTarget = XMVector3Normalize(camTarget);
+
+	XMMATRIX rotateY;
+	rotateY = XMMatrixRotationY(yTarget);
+
+	camRight = XMVector2TransformCoord(defRight, rotateY);
 	camUp = XMVectorSet(xCam, yCam, zCam, 0.0f);
+	camForward = XMVector3TransformCoord(defForward, rotateY);
+
+	camPosition += xCam * camRight;
+	camPosition += zCam * camForward;
+
+	xCam = 0.0f;
+	zCam = 0.0f;
+
+	camTarget = camPosition + camTarget;
 
 	FLOAT yScale = 1.0f / tanf(0.5f * verticalFOV);
 	camProjection = XMMatrixPerspectiveFovLH(verticalFOV, aspectRatio, zNear, zFar);
 
 	camView = XMMatrixLookAtLH(camPosition, camTarget, camUp);
+
+#pragma endregion
 
 	XMVECTOR timeVar;
 	timeVar = XMVectorSet(time.Delta(), time.SmoothDelta(), time.TotalTime(), 0.0f);
@@ -148,22 +266,22 @@ void Game::Update(float delta)
 	XMStoreFloat3(&cbPerObj.time, timeVar);
 	XMStoreFloat3(&cbPerObj.lightDir, lightDir);
 	XMStoreFloat4(&cbPerObj.lightColor, lightColor);
-	//change wvp for each object in render to set it's position/behaviour///////////////////////////////////
+	//change wvp for each object in render to set it's position/behaviour////////////////////////////////////////////////
 
-	geometries[1].matrix = XMMatrixRotationY((float)-time.TotalTime());
-	geometries[1].matrix = geometries[1].matrix * XMMatrixTranslation(1.5f, 0.0f, 0.5f);
+	geometries[0].matrix = XMMatrixScaling(500.0f, 500.0f, 500.0f);
+	geometries[0].matrix = geometries[0].matrix * XMMatrixTranslation(xPos, yPos, zPos);
 
-	/*geometries[2].matrix = XMMatrixTranslation(1.0f, 0.0f, 20.0f);
-	geometries[2].matrix = geometries[2].matrix * XMMatrixScaling(0.01f, 0.01f, 0.01f);*/
+	//left most
+	geometries[1].matrix = XMMatrixIdentity();
+	geometries[1].matrix = geometries[1].matrix * XMMatrixRotationY(time.TotalTime()) *  XMMatrixTranslation(sin(time.TotalTime()), -2 * cosf(time.TotalTime()), -0.5f * sin(time.TotalTime()));
 
-	for (unsigned int i = 0; i < geometries.size(); i++)
-	{
-		if (geometries[i].rotateY)
-		{
-			geometries[i].matrix = XMMatrixRotationY((float)time.TotalTime());
-			geometries[i].matrix = geometries[i].matrix * XMMatrixTranslation(0.0f, 0.0f, 0.75f);
-		}
-	}
+	//right most
+	geometries[2].matrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	geometries[2].matrix = geometries[2].matrix * XMMatrixRotationZ(time.TotalTimeExact());
+
+
+	geometries[3].matrix = XMMatrixTranslation(1.0f, 2 * sin(time.TotalTime()), 1.0f);
+	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationY(45.0f);
 
 }
 
@@ -196,7 +314,6 @@ void Game::Render()
 	context->PSSetSamplers(0, 1, &sampler);
 #pragma endregion
 	///////////////////////////////////////////////////////////////////////////////////
-
 
 //drawing loop
 for (unsigned int i = 0; i < geometries.size(); i++)
@@ -309,6 +426,13 @@ void Game::Shutdown()
 
 	safeRelease(envTexture);
 	safeRelease(deWeySRV);
+
+	safeRelease(ironTexture);
+	safeRelease(ironSRV);
+
+	safeRelease(trippyTexture);
+	safeRelease(trippySRV);
+
 	safeRelease(sampler);
 
 	safeRelease(skyboxTexture);
@@ -409,9 +533,6 @@ void Game::initializeWindow(HWND hwnd)
 void Game::loadPyramid(const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse)
 {
 	geometry geometryToPush;
-
-
-	geometryToPush.rotateY = true;
 
 	geometryToPush.topology = topologyToUse;
 	geometryToPush.textureSRV = textureToUse;
