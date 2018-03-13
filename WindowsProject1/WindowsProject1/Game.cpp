@@ -10,8 +10,8 @@ void Game::Initialize(HWND hwnd)
 
 	lightDir = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	//yellow
-	lightColor = XMVectorSet(0.956f, 0.921f, 0.258f, 0.0f);
-
+	lightColor = XMVectorSet(0.956f, 0.921f, 0.258f, 1.0f);
+	
 	//describing input layout for our position to GPU
 	D3D11_INPUT_ELEMENT_DESC vLayout[] =
 	{
@@ -32,6 +32,8 @@ void Game::Initialize(HWND hwnd)
 	CreateDDSTextureFromFile(device, L"iron.dds", (ID3D11Resource**)&ironTexture, &ironSRV);
 
 	CreateDDSTextureFromFile(device, L"trippy.dds", (ID3D11Resource**)&trippyTexture, &trippySRV);
+
+	CreateDDSTextureFromFile(device, L"knuckle.dds", (ID3D11Resource**)&knuckleTexture, &knuckleSRV);
 
 	//Create models
 	geometry cube;
@@ -127,13 +129,12 @@ void Game::Initialize(HWND hwnd)
 	geometries.push_back(cube);
 
 	//Load models
-	loadPyramid(Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
+	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV);
 
-	loadPyramid(Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV);
+	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
 
-	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
+	//loadIOModel("knuckle.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, knuckleSRV);
 
-	//loadIOModel("Arch.obj", Basic_PS, sizeof(Basic_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
 
 }
 
@@ -149,77 +150,77 @@ void Game::Update(float delta)
 
 	if (GetAsyncKeyState('W'))					//Move forward
 	{
-		zPos += time.SmoothDelta() * moveSpeed;
+		zPos += (float)time.SmoothDelta() * moveSpeed;
 		//zTarget += time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('S'))				//Move back
 	{
-		zPos -= time.SmoothDelta() * moveSpeed;
+		zPos -= (float)time.SmoothDelta() * moveSpeed;
 		//zTarget -= time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('A'))					//Move left
 	{
-		xPos -= time.SmoothDelta() * moveSpeed;
+		xPos -= (float)time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('D'))				//Move right
 	{
-		xPos += time.SmoothDelta() * moveSpeed;
+		xPos += (float)time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('Q'))					//Move up
 	{
-		yPos += time.SmoothDelta() * moveSpeed;
+		yPos += (float)time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('E'))				//Move down
 	{
-		yPos -= time.SmoothDelta() * moveSpeed;
+		yPos -= (float)time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('J'))					//Rotate left
 	{
-		yTarget -= time.SmoothDelta() * moveSpeed;
+		yTarget -= (float)time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('L'))				//Rotate right
 	{
-		yTarget += time.SmoothDelta() * moveSpeed;
+		yTarget += (float)time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('I'))					//Rotate up
 	{
-		xTarget -= time.SmoothDelta() * moveSpeed;
+		xTarget -= (float)time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('K'))				//Rotate down
 	{
-		xTarget += time.SmoothDelta() * moveSpeed;
+		xTarget += (float)time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('Z'))
 	{
-		zNear -= time.SmoothDelta();
+		zNear -= (float)time.SmoothDelta();
 	}
 	else if (GetAsyncKeyState('X'))
 	{
-		zNear += time.SmoothDelta();
+		zNear += (float)time.SmoothDelta();
 	}
 
 	if (GetAsyncKeyState('C'))
 	{
-		zFar -= time.SmoothDelta();
+		zFar -= (float)time.SmoothDelta();
 	}
 	else if (GetAsyncKeyState('V'))
 	{
-		zFar += time.SmoothDelta();
+		zFar += (float)time.SmoothDelta();
 	}
 
 	if (GetAsyncKeyState('B'))
 	{
 		if(verticalFOV >= 0.1f)
-			verticalFOV -= time.SmoothDelta();
+			verticalFOV -= (float)time.SmoothDelta();
 	}
 	else if (GetAsyncKeyState('N'))
 	{
-		verticalFOV += time.SmoothDelta();
+		verticalFOV += (float)time.SmoothDelta();
 	}
 
 #pragma endregion
@@ -254,31 +255,34 @@ void Game::Update(float delta)
 
 #pragma endregion
 
+#pragma region constantBuffer
 	XMVECTOR timeVar;
-	timeVar = XMVectorSet(time.Delta(), time.SmoothDelta(), time.TotalTime(), 0.0f);
-
-	lightColor = XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f);
-	lightDir = XMVectorSet(0.0f, -1.0f, 0.0f, 1.0f);
+	timeVar = XMVectorSet((float)time.Delta(), (float)time.SmoothDelta(), (float)time.TotalTime(), 0.0f);
 
 	XMStoreFloat3(&cbPerObj.time, timeVar);
 	XMStoreFloat3(&cbPerObj.lightDir, lightDir);
 	XMStoreFloat4(&cbPerObj.lightColor, lightColor);
-	//change wvp for each object in render to set it's position/behaviour////////////////////////////////////////////////
+#pragma endregion
 
+	
+	//change wvp for each object in render to set it's position/behaviour////////////////////////////////////////////////
+	//skybox
 	geometries[0].matrix = XMMatrixScaling(500.0f, 500.0f, 500.0f);
 	geometries[0].matrix = geometries[0].matrix * XMMatrixTranslation(xPos, yPos, zPos);
 
 	//left most
 	geometries[1].matrix = XMMatrixIdentity();
-	geometries[1].matrix = geometries[1].matrix * XMMatrixRotationY(time.TotalTime()) *  XMMatrixTranslation(sin(time.TotalTime()), -2 * cosf(time.TotalTime()), -0.5f * sin(time.TotalTime()));
+	geometries[1].matrix = geometries[1].matrix * XMMatrixRotationY((float)time.TotalTime()) *  XMMatrixTranslation(sinf((float)time.TotalTime()), -2 * cosf((float)time.TotalTime()), -0.5f * sin((float)time.TotalTime()));
 
 	//right most
 	geometries[2].matrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-	geometries[2].matrix = geometries[2].matrix * XMMatrixRotationZ(time.TotalTimeExact());
+	geometries[2].matrix = geometries[2].matrix * XMMatrixRotationZ((float)time.TotalTimeExact());
 
 
-	geometries[3].matrix = XMMatrixTranslation(1.0f, 2 * sin(time.TotalTime()), 1.0f);
-	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationY(45.0f);
+	/*geometries[3].matrix = XMMatrixTranslation(1.0f, 2 * sinf((float)time.TotalTime()), 1.0f);
+	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationY(time.TotalTime());*/
+
+	//geometries[3].matrix = XMMatrixTranslation(0.0f, 5.0f, 10.0f) * XMMatrixScaling(0.25f, 0.25f, 0.25f) * XMMatrixRotationY(155);
 
 }
 
@@ -321,6 +325,7 @@ for (unsigned int i = 0; i < geometries.size(); i++)
 
 		WVP = geometries[i].matrix * camView * camProjection;
 		XMStoreFloat4x4(&cbPerObj.WVP, WVP);
+		XMStoreFloat4x4(&cbPerObj.World, geometries[i].matrix);
 
 		D3D11_BUFFER_DESC cBufferDesc;
 		cBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -387,8 +392,7 @@ for (unsigned int i = 0; i < geometries.size(); i++)
 		context->DrawIndexed(geometries[i].indices.size(), 0, 0);
 	}
 
-
-	//call this at end of case WM_PAINT
+	//////////////////////////////////
 	swapChain->Present(0, 0);
 	//////////////////////////////////
 
@@ -429,6 +433,9 @@ void Game::Shutdown()
 
 	safeRelease(trippyTexture);
 	safeRelease(trippySRV);
+
+	safeRelease(knuckleTexture);
+	safeRelease(knuckleSRV);
 
 	safeRelease(sampler);
 
@@ -527,6 +534,8 @@ void Game::initializeWindow(HWND hwnd)
 
 }
 
+//depracated shit
+/*
 void Game::loadPyramid(const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse)
 {
 	geometry geometryToPush;
@@ -576,6 +585,7 @@ void Game::loadPyramid(const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* v
 	geometries.push_back(geometryToPush);
 
 }
+*/
 
 void Game::loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse)
 {
@@ -822,29 +832,32 @@ void Game::loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, c
 
 		}
 
-		for (unsigned int i = 0; i < position.size(); i++)
+		//loading pos, uvs, normals and color
+		for (unsigned int i = 0; i < triangles.size(); i++)
 		{
 			MY_VERTEX pushThis;
 
 			//assign position
-			pushThis.pos = position[i];
-
-			//assign normals
-			unsigned int index = (triangles[i].indices.y - 1) % normals.size();
-			pushThis.normals = normals[index];
+			pushThis.pos = position[triangles[i].indices.x - 1];
 
 			//assign uvs
-			pushThis.texPos = texturePos[triangles[i].indices.z - 1];
+			pushThis.texPos.x = texturePos[triangles[i].indices.y - 1].x;
+			pushThis.texPos.y = 1 - texturePos[triangles[i].indices.y - 1].y;
+
+			//assign normals
+			unsigned int index = (triangles[i].indices.z - 1);
+			pushThis.normals = normals[index];
 			
 			//assign random color
 			float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 			float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 			float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-			pushThis.rgba = { r, g, b, 1.0f };
+			pushThis.rgba = {1.0f, 1.0f, 1.0f, 1.0f };
 
 			geometryToPush.vertices.push_back(pushThis);
 		}
 
+		//loading index
 		for (unsigned int i = 0; i < triangles.size(); i++)
 		{
 			bool match = false;

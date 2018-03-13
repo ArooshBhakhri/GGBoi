@@ -1,6 +1,7 @@
 cbuffer cbPerObject
 {
     float4x4 WVP;
+    float4x4 World;
     float3 time;
     float3 lightDir;
     float4 lightColor;
@@ -33,16 +34,16 @@ OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
     sendToRasterizer.Pos.xyz = fromVertexBuffer.coordinate.xyz;
 
     sendToRasterizer.Pos = mul(WVP, sendToRasterizer.Pos);
-
-	// TODO : PART 3 STEP 7
+    
     sendToRasterizer.Color = fromVertexBuffer.color;
-	// END PART 3
 
     sendToRasterizer.Texture = fromVertexBuffer.texCoord;
 
     sendToRasterizer.time = time;
-
-    sendToRasterizer.Normals = fromVertexBuffer.normals;
+    
+    //float4 normal = mul((float4) (fromVertexBuffer.normals, 1), World);
+    //sendToRasterizer.Normals = normal.xyz;
+    //sendToRasterizer.Normals = fromVertexBuffer.normals;
 
     sendToRasterizer.lightColor = lightColor;
 

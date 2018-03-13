@@ -2,20 +2,10 @@
 
 #include "stdafx.h"
 
-#define BACKBUFFER_HEIGHT 800
-#define BACKBUFFER_WIDTH 800
+#define BACKBUFFER_HEIGHT 1000
+#define BACKBUFFER_WIDTH 1000
 
 #define safeRelease(finished) if(finished != nullptr) if(finished->Release()) { finished = nullptr; }
-
-#define numPyramidVerts 768
-#define numPyramidIndices 1674
-#define pyramidData test_pyramid_data
-#define pyramidIndices test_pyramid_indicies
-
-#define numHouseVerts 4926
-#define numHouseIndices 11520
-#define houseData House2_data
-#define houseIndices House2_indicies
 
 using namespace DirectX;
 using namespace std;
@@ -26,7 +16,6 @@ struct MY_VERTEX
 	XMFLOAT4 rgba;
 	XMFLOAT2 texPos;
 	XMFLOAT3 normals;
-
 	MY_VERTEX() {}
 	MY_VERTEX(float x, float y, float z, float r, float g, float b, float a, float u, float v, float nX, float nY, float nZ)
 		: pos(x, y, z), rgba(r, g, b, a), texPos(u, v), normals(nX, nY, nZ) {}
@@ -55,6 +44,7 @@ struct MY_TRIANGLE
 struct cbPerObject
 {
 	XMFLOAT4X4 WVP;
+	XMFLOAT4X4 World;
 	XMFLOAT3 time;
 	XMFLOAT3 lightDir;
 	XMFLOAT4 lightColor;
@@ -80,9 +70,6 @@ struct geometry
 	////////////////////////////////////////////////
 
 	D3D11_PRIMITIVE_TOPOLOGY topology;
-
-	void* pixelShaderData;
-	void* trivialShaderData;
 
 	vector<MY_VERTEX> vertices;
 	vector<unsigned int> indices;

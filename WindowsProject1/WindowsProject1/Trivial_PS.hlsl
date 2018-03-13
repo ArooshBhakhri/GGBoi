@@ -22,8 +22,12 @@ float map(float value, float inMin, float inMax, float outMin, float outMax)
 
 float4 main( INPUT inData ) : SV_TARGET
 {
-    float lightRatio = clamp(dot(-1 * inData.lightDir, inData.Normals), 0, 1);
 
-    return lightRatio * inData.lightColor * baseTexture.Sample(envFilter, inData.Texture) /* * map(cos(inData.time.b), -1.0f, 1.0f, 0.1f, 1.0f)*/;
-    //return abs(lightRatio) * abs(inData.lightColor) * inData.Color;
+    float4 lightColor = (0.956f, 0.921f, 0.258f, 1.0f);
+    float3 lightDir = (0.0f, -1.0f, 0.0f);
+
+    float lightRatio = saturate(dot(-lightDir, inData.Normals));
+
+    return (lightRatio * lightColor) * baseTexture.Sample(envFilter, inData.Texture) /* * map(cos(inData.time.b), -1.0f, 1.0f, 0.1f, 1.0f)*/;
+    
 }

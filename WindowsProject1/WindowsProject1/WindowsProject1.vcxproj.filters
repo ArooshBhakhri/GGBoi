@@ -39,10 +39,10 @@
     <ClInclude Include="DDSTextureLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="test pyramid.h">
+    <ClInclude Include="House2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="House2.h">
+    <ClInclude Include="test pyramid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
