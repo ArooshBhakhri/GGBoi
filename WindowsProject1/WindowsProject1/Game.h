@@ -151,6 +151,9 @@ private:
 	ID3D11Texture2D *knuckleTexture;
 	ID3D11ShaderResourceView *knuckleSRV;
 
+	ID3D11Texture2D *groundTexture;
+	ID3D11ShaderResourceView *groundSRV;
+
 	//one sampler for all shaders for now
 	ID3D11SamplerState *sampler;
 
@@ -196,6 +199,6 @@ public:
 	//void loadPyramid(const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse);
 	//DEPRACATED
 	void loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse);
-	void CreateSphere(unsigned int latLines, unsigned int longLines);
+	void CreateSphere(unsigned int latLines, unsigned int longLines, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse);
 
 };

@@ -9,6 +9,7 @@ void Game::Initialize(HWND hwnd)
 
 
 	lightDir = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+
 	//yellow
 	lightColor = XMVectorSet(0.956f, 0.921f, 0.258f, 1.0f);
 	
@@ -35,7 +36,11 @@ void Game::Initialize(HWND hwnd)
 
 	CreateDDSTextureFromFile(device, L"knuckle.dds", (ID3D11Resource**)&knuckleTexture, &knuckleSRV);
 
-	//Create models
+	CreateDDSTextureFromFile(device, L"knuckle.dds", (ID3D11Resource**)&groundTexture, &groundSRV);
+
+	//Create models//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/////////////////////////MAKING SKYBOX/////////////////////////////////////////////////////////
 	geometry cube;
 
 	//assigning cube verts
@@ -127,11 +132,54 @@ void Game::Initialize(HWND hwnd)
 	cube.textureSRV = skyboxSRV;
 
 	geometries.push_back(cube);
+	/////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma region ground
+	///////////////////MAKING GROUND PLANE///////////////////////////////////////////////////////
+	//geometry ground;
+
+	//MY_VERTEX gVerts[] =
+	//{
+	//	//			x		y			z			r			g			b			a		u		v		nX		nY		nZ
+	//	MY_VERTEX(-1.0f,	0.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f,	0.0f,	0.0f,	0.0f),
+	//	MY_VERTEX(1.0f,		0.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f,	0.0f,	0.0f,	0.0f),
+	//	MY_VERTEX(-1.0f,	0.0f,	   -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f,	0.0f,	0.0f,	0.0f),
+	//	MY_VERTEX(1.0f,		0.0f,	   -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f,	0.0f,	0.0f,	0.0f)
+	//};
+
+	//unsigned int gIndexes[] =
+	//{
+	//	0,	1,	2,
+	//	2,	1,	3
+	//};
+
+	//for (unsigned int i = 0; i < ARRAYSIZE(gVerts); i++)
+	//{
+	//	ground.vertices.push_back(gVerts[i]);
+	//}
+
+	//for (unsigned int i = 0; i < ARRAYSIZE(gIndexes); i++)
+	//{
+	//	ground.indices.push_back(gIndexes[i]);
+	//}
+
+	//device->CreateVertexShader(Trivial_VS, sizeof(Trivial_VS), NULL, &ground.vertexShader);
+	//device->CreatePixelShader(Skybox_PS, sizeof(Skybox_PS), NULL, &ground.pixelShader);
+
+	//ground.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	//ground.textureSRV = groundSRV;
+
+	//geometries.push_back(ground);
+	////////////////////////////////////////////////////////////////////////////////////////////
+#pragma endregion
 
 	//Load models
 	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV);
 
 	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
+
+	CreateSphere(100, 100, Basic_PS, sizeof(Basic_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
 
 	//loadIOModel("knuckle.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, knuckleSRV);
 
@@ -270,6 +318,8 @@ void Game::Update(float delta)
 	geometries[0].matrix = XMMatrixScaling(500.0f, 500.0f, 500.0f);
 	geometries[0].matrix = geometries[0].matrix * XMMatrixTranslation(xPos, yPos, zPos);
 
+	//geometries[1].matrix = XMMatrixIdentity() * XMMatrixScaling(10.0f, 10.0f, 1.0f);
+
 	//left most
 	geometries[1].matrix = XMMatrixIdentity();
 	geometries[1].matrix = geometries[1].matrix * XMMatrixRotationY((float)time.TotalTime()) *  XMMatrixTranslation(sinf((float)time.TotalTime()), -2 * cosf((float)time.TotalTime()), -0.5f * sin((float)time.TotalTime()));
@@ -278,6 +328,7 @@ void Game::Update(float delta)
 	geometries[2].matrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	geometries[2].matrix = geometries[2].matrix * XMMatrixRotationZ((float)time.TotalTimeExact());
 
+	geometries[3].matrix = XMMatrixIdentity();
 
 	/*geometries[3].matrix = XMMatrixTranslation(1.0f, 2 * sinf((float)time.TotalTime()), 1.0f);
 	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationY(time.TotalTime());*/
@@ -436,6 +487,9 @@ void Game::Shutdown()
 
 	safeRelease(knuckleTexture);
 	safeRelease(knuckleSRV);
+
+	safeRelease(groundTexture);
+	safeRelease(groundSRV);
 
 	safeRelease(sampler);
 
@@ -885,13 +939,28 @@ void Game::loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, c
 	}
 }
 
-void Game::CreateSphere(unsigned int latLines, unsigned int longLines)
+void Game::CreateSphere(unsigned int latLines, unsigned int longLines, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse)
 {
 	numSphereVerts = ((latLines - 2) * longLines + 2);
 	numSphereFaces = ((latLines - 3) * (longLines) * 2) + (longLines * 2);
 
 	float yaw = 0.0f;
 	float pitch = 0.0f;
+
+	geometry sphere;
+
+	sphere.topology = topologyToUse;
+
+	HRESULT result;
+
+	ZeroMemory(&sphere.pixelShader, sizeof(sphere.pixelShader));
+	result = device->CreatePixelShader(pixelShaderData, psSize, NULL, &sphere.pixelShader);
+
+	ZeroMemory(&sphere.vertexShader, sizeof(sphere.vertexShader));
+	result = device->CreateVertexShader(vertexShaderData, vsSize, NULL, &sphere.vertexShader);
+
+	sphere.textureSRV = textureToUse;
+
 
 	vector<MY_VERTEX> sphereVerts(numSphereVerts);
 
@@ -921,27 +990,10 @@ void Game::CreateSphere(unsigned int latLines, unsigned int longLines)
 
 	sphereVerts[numSphereVerts - 1].pos = { 0.0f, 0.0f, -1.0f };
 
-	D3D11_BUFFER_DESC skyboxBufferDesc;
-	ZeroMemory(&skyboxBufferDesc, sizeof(skyboxBufferDesc));
-
-	skyboxBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	skyboxBufferDesc.ByteWidth = sizeof(MY_VERTEX) * numSphereVerts;
-	skyboxBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	skyboxBufferDesc.CPUAccessFlags = 0;
-	skyboxBufferDesc.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA skyboxSubresourceData;
-	ZeroMemory(&skyboxSubresourceData, sizeof(skyboxSubresourceData));
-
-	skyboxSubresourceData.pSysMem = &sphereVerts[0];
-	skyboxSubresourceData.SysMemPitch = 0;
-	skyboxSubresourceData.SysMemSlicePitch = 0;
-
-	device->CreateBuffer(&skyboxBufferDesc, &skyboxSubresourceData, &skyboxVertexBuffer);
-
 	vector<unsigned int> indexes(numSphereFaces * 3);
 
 	unsigned int index = 0;
+
 
 	for (unsigned int i = 0; i < longLines - 1; i++, index += 3)
 	{
@@ -992,23 +1044,15 @@ void Game::CreateSphere(unsigned int latLines, unsigned int longLines)
 	indexes[index + 1] = (numSphereVerts - 1) - longLines;
 	indexes[index + 2] = numSphereVerts - 2;
 
-	D3D11_BUFFER_DESC sphereIndexBufferDesc;
-	ZeroMemory(&sphereIndexBufferDesc, sizeof(sphereIndexBufferDesc));
+	sphere.vertices = sphereVerts;
 
-	sphereIndexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	sphereIndexBufferDesc.ByteWidth = sizeof(unsigned int) * numSphereFaces * 3;
-	sphereIndexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	sphereIndexBufferDesc.CPUAccessFlags = 0;
-	sphereIndexBufferDesc.MiscFlags = 0;
+	sphere.indices = indexes;
 
-	D3D11_SUBRESOURCE_DATA sphereIndexSubResourceData;
-	ZeroMemory(&sphereIndexSubResourceData, sizeof(sphereIndexSubResourceData));
+	for (unsigned int i = 0; i < sphere.vertices.size(); i++)
+	{
+		sphere.vertices[i].rgba = { 0.0f, 0.0f, 1.0f, 1.0f };
+	}
 
-	sphereIndexSubResourceData.pSysMem = &indexes[0];
-	sphereIndexSubResourceData.SysMemPitch = 0;
-	sphereIndexSubResourceData.SysMemSlicePitch = 0;
-
-	device->CreateBuffer(&sphereIndexBufferDesc, &sphereIndexSubResourceData, &skyboxIndexBuffer);
-
+	geometries.push_back(sphere);
 
 }
