@@ -41,6 +41,7 @@ void Game::Initialize(HWND hwnd)
 	//Create models//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////MAKING SKYBOX/////////////////////////////////////////////////////////
+#pragma region skybox
 	geometry cube;
 
 	//assigning cube verts
@@ -132,45 +133,112 @@ void Game::Initialize(HWND hwnd)
 	cube.textureSRV = skyboxSRV;
 
 	geometries.push_back(cube);
+#pragma endregion
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma region ground
 	///////////////////MAKING GROUND PLANE///////////////////////////////////////////////////////
-	//geometry ground;
+	geometry ground;
 
-	//MY_VERTEX gVerts[] =
-	//{
-	//	//			x		y			z			r			g			b			a		u		v		nX		nY		nZ
-	//	MY_VERTEX(-1.0f,	0.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	0.0f,	0.0f,	0.0f,	0.0f),
-	//	MY_VERTEX(1.0f,		0.0f,		1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	0.0f,	0.0f,	0.0f,	0.0f),
-	//	MY_VERTEX(-1.0f,	0.0f,	   -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	0.0f,	1.0f,	0.0f,	0.0f,	0.0f),
-	//	MY_VERTEX(1.0f,		0.0f,	   -1.0f,		1.0f,		1.0f,		1.0f,		1.0f,	1.0f,	1.0f,	0.0f,	0.0f,	0.0f)
-	//};
+	MY_VERTEX gVerts[] =
+	{
+		//			x		y			z			r			g			b			a		u		v		nX		nY		nZ
+		MY_VERTEX(-1.0f,	0.0f,		1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	0.0f,	0.0f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		0.0f,		1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	1.0f,	0.0f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(-1.0f,	0.0f,	   -1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	0.0f,	1.0f,	0.0f,	0.0f,	0.0f),
+		MY_VERTEX(1.0f,		0.0f,	   -1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	1.0f,	1.0f,	0.0f,	0.0f,	0.0f)
+	};
 
-	//unsigned int gIndexes[] =
-	//{
-	//	0,	1,	2,
-	//	2,	1,	3
-	//};
+	unsigned int gIndexes[]
+	{
+		0, 1, 2,
+		2, 1, 3
+	};
 
-	//for (unsigned int i = 0; i < ARRAYSIZE(gVerts); i++)
-	//{
-	//	ground.vertices.push_back(gVerts[i]);
-	//}
+	/*const unsigned int zMax = 20;
+	const unsigned int xMax = 20;
 
-	//for (unsigned int i = 0; i < ARRAYSIZE(gIndexes); i++)
-	//{
-	//	ground.indices.push_back(gIndexes[i]);
-	//}
+	MY_VERTEX triVerts[zMax * xMax * 2 * 3];
 
-	//device->CreateVertexShader(Trivial_VS, sizeof(Trivial_VS), NULL, &ground.vertexShader);
-	//device->CreatePixelShader(Skybox_PS, sizeof(Skybox_PS), NULL, &ground.pixelShader);
+	unsigned int index = 0;
 
+	for (unsigned int z = 0; z < zMax; z++)
+	{
+		float thisY = 0.0f;
+		for (unsigned int x = 0; x < xMax; x++)
+		{
+			triVerts[index].pos = { x * 0.25f, -2.0f, z * 0.25f };
+			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
+			triVerts[index].texPos = { 0.0f, 0.0f };
+			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
+
+			index++;
+
+			triVerts[index].pos = { (x + 1) * 0.25f, -2.0f, z * 0.25f };
+			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
+			triVerts[index].texPos = { 0.0f, 0.0f };
+			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
+
+			index++;
+
+			triVerts[index].pos = { x * 0.25f, -2.0f, (z + 1) * 0.25f };
+			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
+			triVerts[index].texPos = { 0.0f, 0.0f };
+			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
+
+			index++;
+
+			triVerts[index].pos = { (x + 1) * 0.25f, -2.0f, (z + 1) * 0.25f };
+			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
+			triVerts[index].texPos = { 0.0f, 0.0f };
+			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
+
+			index++;
+		}
+	}
+
+	unsigned int gIndexes[zMax * xMax * 6];
+	index = 0;
+	for (unsigned int i = 0; i < zMax; i++)
+	{
+		for (unsigned int j = 0; j < xMax; j++)
+		{
+			gIndexes[index] = index - (j * 2);
+			index++;
+			gIndexes[index] = index - (j * 2);
+			index++;
+			gIndexes[index] = index - (j * 2);
+
+			gIndexes[index + 1] = index - (j * 2);
+			gIndexes[index + 2] = index - 1 - (j * 2);
+			index += 3;
+			gIndexes[index] = index - 2 - (j * 2);
+			index++;
+		}
+	}*/
+
+	for (unsigned int i = 0; i < ARRAYSIZE(gVerts); i++)
+	{
+		ground.vertices.push_back(gVerts[i]);
+	}
+
+	for (unsigned int i = 0; i < ARRAYSIZE(gIndexes); i++)
+	{
+		ground.indices.push_back(gIndexes[i]);
+	}
+
+	device->CreateVertexShader(TessVertexShader, sizeof(TessVertexShader), NULL, &ground.vertexShader);
+	device->CreatePixelShader(Basic_PS, sizeof(Basic_PS), NULL, &ground.pixelShader);
+	device->CreateHullShader(TessHullShader, sizeof(TessHullShader), NULL, &ground.hullShader);
+	device->CreateDomainShader(TessDomainShader, sizeof(TessDomainShader), NULL, &ground.domainShader);
+	device->CreateGeometryShader(TessGeometryShader, sizeof(TessGeometryShader), NULL, &ground.geometryShader);
+
+	ground.tesselation = true;
+
+	ground.topology = D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
 	//ground.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	//ground.textureSRV = groundSRV;
-
-	//geometries.push_back(ground);
+	geometries.push_back(ground);
 	////////////////////////////////////////////////////////////////////////////////////////////
 #pragma endregion
 
@@ -193,6 +261,27 @@ void Game::Update(float delta)
 		return;
 
 	time.Signal();
+
+#pragma region rasterizerState
+	if (GetAsyncKeyState('F'))
+		wireFrame = !wireFrame;
+
+	D3D11_RASTERIZER_DESC rasterDesc;
+	ZeroMemory(&rasterDesc, sizeof(rasterDesc));
+
+	rasterDesc.AntialiasedLineEnable = true;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = (wireFrame == true) ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = true;
+	rasterDesc.ScissorEnable = false;
+	
+	safeRelease(rasterizerState);
+	device->CreateRasterizerState(&rasterDesc, &rasterizerState);
+
+	context->RSSetState(rasterizerState);
+#pragma endregion
 
 #pragma region camControls
 
@@ -281,12 +370,16 @@ void Game::Update(float delta)
 	camTarget = XMVector3TransformCoord(defForward, camRotation);
 	camTarget = XMVector3Normalize(camTarget);
 
-	XMMATRIX rotateY;
+	/*XMMATRIX rotateY;
 	rotateY = XMMatrixRotationY(yTarget);
 
 	camRight = XMVector2TransformCoord(defRight, rotateY);
 	camUp = XMVectorSet(xCam, yCam, zCam, 0.0f);
-	camForward = XMVector3TransformCoord(defForward, rotateY);
+	camForward = XMVector3TransformCoord(defForward, rotateY);*/
+
+	camRight = XMVector3TransformCoord(defRight, camRotation);
+	camForward = XMVector3TransformCoord(defForward, camRotation);
+	camUp = XMVector3Cross(camForward, camRight);
 
 	camPosition += xCam * camRight;
 	camPosition += zCam * camForward;
@@ -312,29 +405,29 @@ void Game::Update(float delta)
 	XMStoreFloat4(&cbPerObj.lightColor, lightColor);
 #pragma endregion
 
-	
+#pragma region matrices
 	//change wvp for each object in render to set it's position/behaviour////////////////////////////////////////////////
 	//skybox
 	geometries[0].matrix = XMMatrixScaling(500.0f, 500.0f, 500.0f);
 	geometries[0].matrix = geometries[0].matrix * XMMatrixTranslation(xPos, yPos, zPos);
 
-	//geometries[1].matrix = XMMatrixIdentity() * XMMatrixScaling(10.0f, 10.0f, 1.0f);
+	geometries[1].matrix = XMMatrixIdentity() * XMMatrixScaling(100.0f, 1.0f, 100.0f) * XMMatrixTranslation(-1.0f, -5.0f, -1.0f);
 
 	//left most
-	geometries[1].matrix = XMMatrixIdentity();
-	geometries[1].matrix = geometries[1].matrix * XMMatrixRotationY((float)time.TotalTime()) *  XMMatrixTranslation(sinf((float)time.TotalTime()), -2 * cosf((float)time.TotalTime()), -0.5f * sin((float)time.TotalTime()));
+	geometries[2].matrix = XMMatrixIdentity();
+	geometries[2].matrix = geometries[2].matrix * XMMatrixRotationY((float)time.TotalTime()) *  XMMatrixTranslation(sinf((float)time.TotalTime()), -2 * cosf((float)time.TotalTime()), -0.5f * sin((float)time.TotalTime()));
 
 	//right most
-	geometries[2].matrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-	geometries[2].matrix = geometries[2].matrix * XMMatrixRotationZ((float)time.TotalTimeExact());
+	geometries[3].matrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationZ((float)time.TotalTimeExact());
 
-	geometries[3].matrix = XMMatrixIdentity();
+	geometries[4].matrix = XMMatrixIdentity();
 
 	/*geometries[3].matrix = XMMatrixTranslation(1.0f, 2 * sinf((float)time.TotalTime()), 1.0f);
 	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationY(time.TotalTime());*/
 
 	//geometries[3].matrix = XMMatrixTranslation(0.0f, 5.0f, 10.0f) * XMMatrixScaling(0.25f, 0.25f, 0.25f) * XMMatrixRotationY(155);
-
+#pragma endregion
 }
 
 void Game::Render()
@@ -372,9 +465,21 @@ for (unsigned int i = 0; i < geometries.size(); i++)
 	{
 
 		context->VSSetShader(geometries[i].vertexShader, 0, 0);
-		context->PSSetShader(geometries[i].pixelShader, 0, 0);
-
 		WVP = geometries[i].matrix * camView * camProjection;
+
+		if (geometries[i].tesselation == true)
+		{
+			context->HSSetShader(geometries[i].hullShader, 0, 0);
+			context->DSSetShader(geometries[i].domainShader, 0, 0);
+			context->GSSetShader(geometries[i].geometryShader, 0, 0);
+		}
+		else
+		{
+			context->HSSetShader(NULL, 0, 0);
+			context->DSSetShader(NULL, 0, 0);
+			context->GSSetShader(NULL, 0, 0);
+		}
+
 		XMStoreFloat4x4(&cbPerObj.WVP, WVP);
 		XMStoreFloat4x4(&cbPerObj.World, geometries[i].matrix);
 
@@ -395,8 +500,13 @@ for (unsigned int i = 0; i < geometries.size(); i++)
 		result = device->CreateBuffer(&cBufferDesc, &cBufferSubData, &cbPerObjectBuffer);
 		context->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
 
-		ID3D11ShaderResourceView* textureSRV[] = { geometries[i].textureSRV };
-		context->PSSetShaderResources(0, 1, textureSRV);
+		if (geometries[i].textureSRV != nullptr)
+		{
+			ID3D11ShaderResourceView* textureSRV[] = { geometries[i].textureSRV };
+			context->PSSetShaderResources(0, 1, textureSRV);
+		}
+
+		context->PSSetShader(geometries[i].pixelShader, 0, 0);
 
 		//creating vertex buffer
 		ZeroMemory(&geometries[i].vertexBuffer, sizeof(geometries[i].vertexBuffer));
@@ -465,11 +575,15 @@ void Game::Shutdown()
 	{
 		safeRelease(geometries[i].vertexShader);
 		safeRelease(geometries[i].pixelShader);
-		
+		safeRelease(geometries[i].domainShader);
+		safeRelease(geometries[i].hullShader);
+		safeRelease(geometries[i].geometryShader);
 	}
 
 	safeRelease(vertexBuffer);
 	safeRelease(indexBuffer);
+
+	safeRelease(rasterizerState);
 
 	safeRelease(layout);
 	safeRelease(shaderBuffer);

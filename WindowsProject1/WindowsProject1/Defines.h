@@ -60,7 +60,7 @@ struct geometry
 	///////////////////////////////////////////////
 
 	//pixel shader stuff////////////////////////////
-	ID3D11ShaderResourceView* textureSRV;
+	ID3D11ShaderResourceView* textureSRV = nullptr;
 	ID3D11PixelShader *pixelShader;
 	////////////////////////////////////////////////
 
@@ -68,6 +68,13 @@ struct geometry
 	D3D11_BUFFER_DESC indexBuffer;
 	D3D11_SUBRESOURCE_DATA indexBufferSubData;
 	////////////////////////////////////////////////
+
+	//for tesselation////////////////////////////////
+	bool tesselation = false;
+	ID3D11HullShader *hullShader = nullptr;
+	ID3D11DomainShader *domainShader = nullptr;
+	ID3D11GeometryShader *geometryShader = nullptr;
+	/////////////////////////////////////////////////
 
 	D3D11_PRIMITIVE_TOPOLOGY topology;
 

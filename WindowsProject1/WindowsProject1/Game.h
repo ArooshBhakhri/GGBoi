@@ -96,11 +96,15 @@ private:
 	//};
 #pragma endregion
 
+	bool wireFrame = false;
+
 	vector<geometry> geometries;
 
 	ID3D11Buffer *vertexBuffer;
 	ID3D11Buffer *indexBuffer;
 	///////////////////////////////////
+
+	ID3D11RasterizerState *rasterizerState;
 
 	//Shaders//////////////////////////
 	ID3D11InputLayout *layout;
