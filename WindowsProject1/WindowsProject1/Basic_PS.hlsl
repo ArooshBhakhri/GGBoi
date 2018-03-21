@@ -13,6 +13,5 @@ float map(float value, float inMin, float inMax, float outMin, float outMax)
 
 float4 main(INPUT inData) : SV_TARGET
 {
-
     return inData.Color;
 }

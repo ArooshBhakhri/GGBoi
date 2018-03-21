@@ -10,7 +10,7 @@
 using namespace DirectX;
 using namespace std;
 
-struct MY_VERTEX 
+struct MY_VERTEX
 {
 	XMFLOAT3 pos;
 	XMFLOAT4 rgba;
@@ -27,6 +27,62 @@ struct MY_VERTEX
 		this->texPos = rhs.texPos;
 		this->normals = rhs.normals;
 	}
+};
+
+struct geometry
+{
+	XMMATRIX matrix;
+	//vertex shader stuff//////////////////////////
+	D3D11_BUFFER_DESC vertexBuffer;
+	D3D11_SUBRESOURCE_DATA vertexBufferSubData;
+	ID3D11VertexShader *vertexShader = nullptr;
+	///////////////////////////////////////////////
+
+	//pixel shader stuff////////////////////////////
+	ID3D11ShaderResourceView *textureSRV = nullptr;
+	ID3D11ShaderResourceView *texture1SRV = nullptr;
+	ID3D11PixelShader *pixelShader = nullptr;
+	////////////////////////////////////////////////
+
+	//index buffer stuff///////////////////////////
+	D3D11_BUFFER_DESC indexBuffer;
+	D3D11_SUBRESOURCE_DATA indexBufferSubData;
+	////////////////////////////////////////////////
+
+	//for tesselation////////////////////////////////
+	ID3D11HullShader *hullShader = nullptr;
+	ID3D11DomainShader *domainShader = nullptr;
+	ID3D11GeometryShader *geometryShader = nullptr;
+	/////////////////////////////////////////////////
+
+	const BYTE *PixelShader = nullptr;
+	const BYTE *VertexShader = nullptr;
+
+	D3D11_PRIMITIVE_TOPOLOGY topology;
+
+	vector<MY_VERTEX> vertices;
+	vector<unsigned int> indices;
+
+	void operator=(geometry rhs)
+	{
+		this->matrix = rhs.matrix;
+		this->vertexBuffer = rhs.vertexBuffer;
+		this->vertexBufferSubData = rhs.vertexBufferSubData;
+		this->vertexShader = rhs.vertexShader;
+		this->textureSRV = rhs.textureSRV;
+		this->pixelShader = rhs.pixelShader;
+		this->indexBuffer = rhs.indexBuffer;
+		this->indexBufferSubData = rhs.indexBufferSubData;
+		this->hullShader = rhs.hullShader;
+		this->domainShader = rhs.domainShader;
+		this->geometryShader = rhs.geometryShader;
+		this->PixelShader = rhs.PixelShader;
+		this->VertexShader = rhs.VertexShader;
+		this->topology = rhs.topology;
+		this->vertices = rhs.vertices;
+		this->indices = rhs.indices;
+	}
+
 };
 
 struct MY_TRIANGLE
@@ -46,38 +102,20 @@ struct cbPerObject
 	XMFLOAT4X4 WVP;
 	XMFLOAT4X4 World;
 	XMFLOAT3 time;
-	XMFLOAT3 lightDir;
-	XMFLOAT4 lightColor;
 };
 
-struct geometry
+struct cbTrivial_PS
 {
-	XMMATRIX matrix;
-	//vertex shader stuff//////////////////////////
-	D3D11_BUFFER_DESC vertexBuffer;
-	D3D11_SUBRESOURCE_DATA vertexBufferSubData;
-	ID3D11VertexShader *vertexShader;
-	///////////////////////////////////////////////
+	XMFLOAT3 dir;
+	XMFLOAT4 color;
+};
 
-	//pixel shader stuff////////////////////////////
-	ID3D11ShaderResourceView* textureSRV = nullptr;
-	ID3D11PixelShader *pixelShader;
-	////////////////////////////////////////////////
+struct cbGrid_GS
+{
+	XMFLOAT4X4 VP;
+};
 
-	//index buffer stuff///////////////////////////
-	D3D11_BUFFER_DESC indexBuffer;
-	D3D11_SUBRESOURCE_DATA indexBufferSubData;
-	////////////////////////////////////////////////
-
-	//for tesselation////////////////////////////////
-	bool tesselation = false;
-	ID3D11HullShader *hullShader = nullptr;
-	ID3D11DomainShader *domainShader = nullptr;
-	ID3D11GeometryShader *geometryShader = nullptr;
-	/////////////////////////////////////////////////
-
-	D3D11_PRIMITIVE_TOPOLOGY topology;
-
-	vector<MY_VERTEX> vertices;
-	vector<unsigned int> indices;
+struct cbGrid_HS
+{
+	float distance;
 };

@@ -2,6 +2,12 @@ Texture2D baseTexture;
 
 SamplerState envFilter;
 
+cbuffer cBufferPS
+{
+	float3 dir;
+	float4 color;
+};
+
 struct INPUT
 {
     float4 Pos : SV_POSITION;
@@ -9,8 +15,6 @@ struct INPUT
     float2 Texture : TEXCOORD0;
     float3 Normals : NORMALS;
     float3 time : TIMER;
-    float3 lightDir : LIGHTDIR;
-    float4 lightColor : LIGHTCOLOR;
 };
 
 float map(float value, float inMin, float inMax, float outMin, float outMax)
@@ -23,8 +27,14 @@ float map(float value, float inMin, float inMax, float outMin, float outMax)
 float4 main( INPUT inData ) : SV_TARGET
 {
 
-    float lightRatio = saturate(dot(-inData.lightDir, inData.Normals));
+    float lightRatio = saturate(dot(-dir, inData.Normals));
 
-    return /*(lightRatio * inData.lightColor) * */baseTexture.Sample(envFilter, inData.Texture) /* * map(cos(inData.time.b), -1.0f, 1.0f, 0.1f, 1.0f)*/;
+    lightRatio = saturate(lightRatio + 0.30f);
+
+    float4 final = baseTexture.Sample(envFilter, inData.Texture).rgba;
+
+    clip(final.a - 0.25f);
+
+    return lightRatio * color.rgba * final;
     
 }

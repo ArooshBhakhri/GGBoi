@@ -3,8 +3,6 @@ cbuffer cbPerObject
     float4x4 WVP;
     float4x4 World;
     float3 time;
-    float3 lightDir;
-    float4 lightColor;
 };
 
 struct OUTPUT_VERTEX
@@ -14,8 +12,6 @@ struct OUTPUT_VERTEX
     float2 Texture : TEXCOORD;
     float3 Normals : NORMALS;
     float3 time : TIMER;
-    float3 lightDir : LIGHTDIR;
-    float4 lightColor : LIGHTCOLOR;
 };
 
 struct INPUT_VERTEX
@@ -40,14 +36,8 @@ OUTPUT_VERTEX main(INPUT_VERTEX fromVertexBuffer)
     sendToRasterizer.Texture = fromVertexBuffer.texCoord;
 
     sendToRasterizer.time = time;
-    
-    //float4 normal = mul((float4) (fromVertexBuffer.normals, 1), World);
-    //sendToRasterizer.Normals = normal.xyz;
-    //sendToRasterizer.Normals = fromVertexBuffer.normals;
 
-    sendToRasterizer.lightColor = lightColor;
-
-    sendToRasterizer.lightDir = lightDir;
+    sendToRasterizer.Normals = fromVertexBuffer.normals;
 
     return sendToRasterizer;
 }

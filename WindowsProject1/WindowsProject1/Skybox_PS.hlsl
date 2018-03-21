@@ -9,11 +9,9 @@ struct inPut
     float2 Texture : TEXCOORD0;
     float3 Normals : NORMALS;
     float3 time : TIMER;
-    float3 lightDir : LIGHTDIR;
-    float4 lightColor : LIGHTCOLOR;
 };
 
 float4 main(inPut inData) : SV_TARGET
 {
-    return skyboxTexture.Sample(skyboxSRV, inData.Texture);
+    return skyboxTexture.Sample(skyboxSRV, inData.Texture) * 0.50f;
 }

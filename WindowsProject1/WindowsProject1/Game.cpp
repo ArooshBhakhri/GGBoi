@@ -1,17 +1,12 @@
 #include "stdafx.h"
 
+
 void Game::Initialize(HWND hwnd)
 {
 
 	time.Restart();
 
 	initializeWindow(hwnd);
-
-
-	lightDir = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-
-	//yellow
-	lightColor = XMVectorSet(0.956f, 0.921f, 0.258f, 1.0f);
 	
 	//describing input layout for our position to GPU
 	D3D11_INPUT_ELEMENT_DESC vLayout[] =
@@ -28,7 +23,7 @@ void Game::Initialize(HWND hwnd)
 	//Load in textures
 	CreateDDSTextureFromFile(device, L"bricks.dds", (ID3D11Resource**)&envTexture, &deWeySRV);
 	
-	CreateDDSTextureFromFile(device, L"Skybox.dds", (ID3D11Resource**)&skyboxTexture, &skyboxSRV);
+	CreateDDSTextureFromFile(device, L"Skybox1.dds", (ID3D11Resource**)&skyboxTexture, &skyboxSRV);
 
 	CreateDDSTextureFromFile(device, L"iron.dds", (ID3D11Resource**)&ironTexture, &ironSRV);
 
@@ -36,8 +31,11 @@ void Game::Initialize(HWND hwnd)
 
 	CreateDDSTextureFromFile(device, L"knuckle.dds", (ID3D11Resource**)&knuckleTexture, &knuckleSRV);
 
-	CreateDDSTextureFromFile(device, L"knuckle.dds", (ID3D11Resource**)&groundTexture, &groundSRV);
+	CreateDDSTextureFromFile(device, L"Stryker.dds", (ID3D11Resource**)&groundTexture, &groundSRV);
 
+	CreateDDSTextureFromFile(device, L"moss.dds", (ID3D11Resource**)&mossTexture, &mossSRV);
+
+	CreateDDSTextureFromFile(device, L"sun.dds", (ID3D11Resource**)&sunTexture, &sunSRV);
 	//Create models//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////MAKING SKYBOX/////////////////////////////////////////////////////////
@@ -125,8 +123,8 @@ void Game::Initialize(HWND hwnd)
 		cube.indices.push_back(indexes[i]);
 	}
 
-	device->CreateVertexShader(Trivial_VS, sizeof(Trivial_VS), NULL, &cube.vertexShader);
-	device->CreatePixelShader(Skybox_PS, sizeof(Skybox_PS), NULL, &cube.pixelShader);
+	device->CreateVertexShader(cube.VertexShader = Trivial_VS, sizeof(Trivial_VS), NULL, &cube.vertexShader);
+	device->CreatePixelShader(cube.PixelShader = Skybox_PS, sizeof(Skybox_PS), NULL, &cube.pixelShader);
 
 	cube.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
@@ -136,121 +134,35 @@ void Game::Initialize(HWND hwnd)
 #pragma endregion
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma region ground
-	///////////////////MAKING GROUND PLANE///////////////////////////////////////////////////////
-	geometry ground;
-
-	MY_VERTEX gVerts[] =
-	{
-		//			x		y			z			r			g			b			a		u		v		nX		nY		nZ
-		MY_VERTEX(-1.0f,	0.0f,		1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	0.0f,	0.0f,	0.0f,	0.0f,	0.0f),
-		MY_VERTEX(1.0f,		0.0f,		1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	1.0f,	0.0f,	0.0f,	0.0f,	0.0f),
-		MY_VERTEX(-1.0f,	0.0f,	   -1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	0.0f,	1.0f,	0.0f,	0.0f,	0.0f),
-		MY_VERTEX(1.0f,		0.0f,	   -1.0f,		0.5f,		0.3f,		0.03f,		1.0f,	1.0f,	1.0f,	0.0f,	0.0f,	0.0f)
-	};
-
-	unsigned int gIndexes[]
-	{
-		0, 1, 2,
-		2, 1, 3
-	};
-
-	/*const unsigned int zMax = 20;
-	const unsigned int xMax = 20;
-
-	MY_VERTEX triVerts[zMax * xMax * 2 * 3];
-
-	unsigned int index = 0;
-
-	for (unsigned int z = 0; z < zMax; z++)
-	{
-		float thisY = 0.0f;
-		for (unsigned int x = 0; x < xMax; x++)
-		{
-			triVerts[index].pos = { x * 0.25f, -2.0f, z * 0.25f };
-			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
-			triVerts[index].texPos = { 0.0f, 0.0f };
-			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
-
-			index++;
-
-			triVerts[index].pos = { (x + 1) * 0.25f, -2.0f, z * 0.25f };
-			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
-			triVerts[index].texPos = { 0.0f, 0.0f };
-			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
-
-			index++;
-
-			triVerts[index].pos = { x * 0.25f, -2.0f, (z + 1) * 0.25f };
-			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
-			triVerts[index].texPos = { 0.0f, 0.0f };
-			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
-
-			index++;
-
-			triVerts[index].pos = { (x + 1) * 0.25f, -2.0f, (z + 1) * 0.25f };
-			triVerts[index].rgba = { 0.5f, 0.3f, 0.03f, 1.0f };
-			triVerts[index].texPos = { 0.0f, 0.0f };
-			triVerts[index].normals = { 0.0f, 0.0f, 0.0f };
-
-			index++;
-		}
-	}
-
-	unsigned int gIndexes[zMax * xMax * 6];
-	index = 0;
-	for (unsigned int i = 0; i < zMax; i++)
-	{
-		for (unsigned int j = 0; j < xMax; j++)
-		{
-			gIndexes[index] = index - (j * 2);
-			index++;
-			gIndexes[index] = index - (j * 2);
-			index++;
-			gIndexes[index] = index - (j * 2);
-
-			gIndexes[index + 1] = index - (j * 2);
-			gIndexes[index + 2] = index - 1 - (j * 2);
-			index += 3;
-			gIndexes[index] = index - 2 - (j * 2);
-			index++;
-		}
-	}*/
-
-	for (unsigned int i = 0; i < ARRAYSIZE(gVerts); i++)
-	{
-		ground.vertices.push_back(gVerts[i]);
-	}
-
-	for (unsigned int i = 0; i < ARRAYSIZE(gIndexes); i++)
-	{
-		ground.indices.push_back(gIndexes[i]);
-	}
-
-	device->CreateVertexShader(TessVertexShader, sizeof(TessVertexShader), NULL, &ground.vertexShader);
-	device->CreatePixelShader(Basic_PS, sizeof(Basic_PS), NULL, &ground.pixelShader);
-	device->CreateHullShader(TessHullShader, sizeof(TessHullShader), NULL, &ground.hullShader);
-	device->CreateDomainShader(TessDomainShader, sizeof(TessDomainShader), NULL, &ground.domainShader);
-	device->CreateGeometryShader(TessGeometryShader, sizeof(TessGeometryShader), NULL, &ground.geometryShader);
-
-	ground.tesselation = true;
-
-	ground.topology = D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
-	//ground.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	geometries.push_back(ground);
-	////////////////////////////////////////////////////////////////////////////////////////////
-#pragma endregion
+	CreateGrid(5, 5, 1.0f, { 0.44705f, 0.22352f, 0.0f, 1.0f }, Tess_PS, sizeof(Tess_PS), Tess_VS, sizeof(Tess_VS), D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+	device->CreateGeometryShader(Tess_GS, sizeof(Tess_GS), NULL, &geometries[geometries.size() - 1].geometryShader);
+	device->CreateDomainShader(Tess_DS, sizeof(Tess_DS), NULL, &geometries[geometries.size() - 1].domainShader);
+	device->CreateHullShader(Tess_HS, sizeof(Tess_HS), NULL, &geometries[geometries.size() - 1].hullShader);
 
 	//Load models
-	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV);
+	loadIOModel("test pyramid.obj", MultiTexture_PS, sizeof(MultiTexture_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV, mossSRV);
 
 	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
 
-	CreateSphere(100, 100, Basic_PS, sizeof(Basic_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
+	//loadIOModel("test pyramid.obj", Basic_PS, sizeof(Basic_PS), Grid_VS, sizeof(Grid_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, sunSRV);
 
-	//loadIOModel("knuckle.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, knuckleSRV);
+#pragma region sampler
+		D3D11_SAMPLER_DESC samplerDesc;
 
+		ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+
+		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+		safeRelease(sampler);
+		HRESULT result = device->CreateSamplerState(&samplerDesc, &sampler);
+
+#pragma endregion
 
 }
 
@@ -268,7 +180,7 @@ void Game::Update(float delta)
 
 	D3D11_RASTERIZER_DESC rasterDesc;
 	ZeroMemory(&rasterDesc, sizeof(rasterDesc));
-
+	
 	rasterDesc.AntialiasedLineEnable = true;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.DepthClipEnable = true;
@@ -299,19 +211,23 @@ void Game::Update(float delta)
 	if (GetAsyncKeyState('A'))					//Move left
 	{
 		xPos -= (float)time.SmoothDelta() * moveSpeed;
+		//xTarget -= (float)time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('D'))				//Move right
 	{
 		xPos += (float)time.SmoothDelta() * moveSpeed;
+		//xTarget += (float)time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('Q'))					//Move up
 	{
 		yPos += (float)time.SmoothDelta() * moveSpeed;
+		//yTarget += (float)time.SmoothDelta() * moveSpeed;
 	}
 	else if (GetAsyncKeyState('E'))				//Move down
 	{
 		yPos -= (float)time.SmoothDelta() * moveSpeed;
+		//yPos -= (float)time.SmoothDelta() * moveSpeed;
 	}
 
 	if (GetAsyncKeyState('J'))					//Rotate left
@@ -334,6 +250,7 @@ void Game::Update(float delta)
 
 	if (GetAsyncKeyState('Z'))
 	{
+		if(zNear > 0.1f)
 		zNear -= (float)time.SmoothDelta();
 	}
 	else if (GetAsyncKeyState('X'))
@@ -343,7 +260,8 @@ void Game::Update(float delta)
 
 	if (GetAsyncKeyState('C'))
 	{
-		zFar -= (float)time.SmoothDelta();
+		if(zFar > 0.1f)
+			zFar -= (float)time.SmoothDelta();
 	}
 	else if (GetAsyncKeyState('V'))
 	{
@@ -352,7 +270,7 @@ void Game::Update(float delta)
 
 	if (GetAsyncKeyState('B'))
 	{
-		if(verticalFOV >= 0.1f)
+		if(verticalFOV > 0.1f)
 			verticalFOV -= (float)time.SmoothDelta();
 	}
 	else if (GetAsyncKeyState('N'))
@@ -370,16 +288,10 @@ void Game::Update(float delta)
 	camTarget = XMVector3TransformCoord(defForward, camRotation);
 	camTarget = XMVector3Normalize(camTarget);
 
-	/*XMMATRIX rotateY;
-	rotateY = XMMatrixRotationY(yTarget);
-
-	camRight = XMVector2TransformCoord(defRight, rotateY);
-	camUp = XMVectorSet(xCam, yCam, zCam, 0.0f);
-	camForward = XMVector3TransformCoord(defForward, rotateY);*/
-
 	camRight = XMVector3TransformCoord(defRight, camRotation);
-	camForward = XMVector3TransformCoord(defForward, camRotation);
 	camUp = XMVector3Cross(camForward, camRight);
+	camForward = XMVector3TransformCoord(defForward, camRotation);
+	//camForward = XMVector3Cross(camRight, camUp);
 
 	camPosition += xCam * camRight;
 	camPosition += zCam * camForward;
@@ -401,8 +313,18 @@ void Game::Update(float delta)
 	timeVar = XMVectorSet((float)time.Delta(), (float)time.SmoothDelta(), (float)time.TotalTime(), 0.0f);
 
 	XMStoreFloat3(&cbPerObj.time, timeVar);
-	XMStoreFloat3(&cbPerObj.lightDir, lightDir);
-	XMStoreFloat4(&cbPerObj.lightColor, lightColor);
+#pragma endregion
+
+#pragma region directionalLighting
+	//XMVECTOR dir;
+	XMVECTOR dir = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+	dir = XMVector3TransformCoord(dir, XMMatrixIdentity() * camView * camProjection);
+	XMStoreFloat3(&cbTrivialPS.dir, dir);
+
+	XMVECTOR color;
+	color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	XMStoreFloat4(&cbTrivialPS.color, color);
 #pragma endregion
 
 #pragma region matrices
@@ -411,7 +333,7 @@ void Game::Update(float delta)
 	geometries[0].matrix = XMMatrixScaling(500.0f, 500.0f, 500.0f);
 	geometries[0].matrix = geometries[0].matrix * XMMatrixTranslation(xPos, yPos, zPos);
 
-	geometries[1].matrix = XMMatrixIdentity() * XMMatrixScaling(100.0f, 1.0f, 100.0f) * XMMatrixTranslation(-1.0f, -5.0f, -1.0f);
+	geometries[1].matrix = XMMatrixIdentity() * XMMatrixTranslation(-5.0f, -2.0f, 0.0f);
 
 	//left most
 	geometries[2].matrix = XMMatrixIdentity();
@@ -419,73 +341,54 @@ void Game::Update(float delta)
 
 	//right most
 	geometries[3].matrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationZ((float)time.TotalTimeExact());
+	//geometries[3].matrix = geometries[3].matrix * XMMatrixRotationZ((float)time.TotalTimeExact());
 
-	geometries[4].matrix = XMMatrixIdentity();
-
-	/*geometries[3].matrix = XMMatrixTranslation(1.0f, 2 * sinf((float)time.TotalTime()), 1.0f);
-	geometries[3].matrix = geometries[3].matrix * XMMatrixRotationY(time.TotalTime());*/
-
-	//geometries[3].matrix = XMMatrixTranslation(0.0f, 5.0f, 10.0f) * XMMatrixScaling(0.25f, 0.25f, 0.25f) * XMMatrixRotationY(155);
+	//geometries[4].matrix = XMMatrixIdentity();
 #pragma endregion
+
 }
 
 void Game::Render()
 {
-	
-	setBaseColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 	context->ClearDepthStencilView(dStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	context->IASetInputLayout(layout);
+
+	setBaseColor(0.0f, 0.0f, 0.0f, 0.0f);
+
 
 	HRESULT result;
 
 	//setting sampler for all pixel shaders//////////////////////////////////////////////
-#pragma region sampler
-	D3D11_SAMPLER_DESC samplerDesc;
-
-	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	safeRelease(sampler);
-	result = device->CreateSamplerState(&samplerDesc, &sampler);
-
-	context->PSSetSamplers(0, 1, &sampler);
-#pragma endregion
-	///////////////////////////////////////////////////////////////////////////////////
 
 //drawing loop
-for (unsigned int i = 0; i < geometries.size(); i++)
+	for (unsigned int i = 0; i < geometries.size(); i++)
 	{
+		/*if (i != 0 && i != 1)
+			CalculateNormals(&geometries[i], i);*/
+
+		////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
 
 		context->VSSetShader(geometries[i].vertexShader, 0, 0);
+		context->PSSetShader(geometries[i].pixelShader, 0, 0);
+
+		context->PSSetSamplers(0, 1, &sampler);
+
 		WVP = geometries[i].matrix * camView * camProjection;
 
-		if (geometries[i].tesselation == true)
-		{
-			context->HSSetShader(geometries[i].hullShader, 0, 0);
-			context->DSSetShader(geometries[i].domainShader, 0, 0);
-			context->GSSetShader(geometries[i].geometryShader, 0, 0);
-		}
-		else
-		{
-			context->HSSetShader(NULL, 0, 0);
-			context->DSSetShader(NULL, 0, 0);
-			context->GSSetShader(NULL, 0, 0);
-		}
+		(geometries[i].hullShader == nullptr ? context->HSSetShader(NULL, 0, 0) : context->HSSetShader(geometries[i].hullShader, 0, 0));
+		(geometries[i].domainShader == nullptr ? context->DSSetShader(NULL, 0, 0) : context->DSSetShader(geometries[i].domainShader, 0, 0));
+		(geometries[i].geometryShader == nullptr ? context->GSSetShader(NULL, 0, 0) : context->GSSetShader(geometries[i].geometryShader, 0, 0));
 
+		//setting up constant buffer for vert shader///////////////////////////////////////////
+#pragma region vShaderCBuffer
 		XMStoreFloat4x4(&cbPerObj.WVP, WVP);
 		XMStoreFloat4x4(&cbPerObj.World, geometries[i].matrix);
 
 		D3D11_BUFFER_DESC cBufferDesc;
 		cBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		cBufferDesc.ByteWidth = sizeof(cbPerObj) + 8;
+		cBufferDesc.ByteWidth = sizeof(cbPerObj) + 4;
 		cBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		cBufferDesc.CPUAccessFlags = 0;
 		cBufferDesc.MiscFlags = 0;
@@ -495,63 +398,188 @@ for (unsigned int i = 0; i < geometries.size(); i++)
 		cBufferSubData.SysMemPitch = 0;
 		cBufferSubData.SysMemSlicePitch = 0;
 
-		//setting up constant buffer
 		safeRelease(cbPerObjectBuffer);
 		result = device->CreateBuffer(&cBufferDesc, &cBufferSubData, &cbPerObjectBuffer);
 		context->VSSetConstantBuffers(0, 1, &cbPerObjectBuffer);
+#pragma endregion
+		//setting up constant buffer for vert shader//////////////////////////////////////////
 
-		if (geometries[i].textureSRV != nullptr)
+		/*
+		//setting up constant buffer for geo shader//////////////////////////////////////////
+		if (geometries[i].geometryShader != nullptr)
 		{
-			ID3D11ShaderResourceView* textureSRV[] = { geometries[i].textureSRV };
-			context->PSSetShaderResources(0, 1, textureSRV);
+			XMStoreFloat4x4(&cbGridGS.VP, camView * camProjection);
+
+			D3D11_BUFFER_DESC geoCBufferDesc;
+			ZeroMemory(&geoCBufferDesc, sizeof(geoCBufferDesc));
+
+			geoCBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+			geoCBufferDesc.ByteWidth = sizeof(cbGridGS);
+			geoCBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			geoCBufferDesc.CPUAccessFlags = 0;
+			geoCBufferDesc.MiscFlags = 0;
+
+			D3D11_SUBRESOURCE_DATA geoCBufferSubData;
+			ZeroMemory(&geoCBufferSubData, sizeof(geoCBufferSubData));
+
+			geoCBufferSubData.pSysMem = &cbGridGS;
+			geoCBufferSubData.SysMemPitch = 0;
+			geoCBufferSubData.SysMemSlicePitch = 0;
+
+			safeRelease(cbGeometryShader);
+			result = device->CreateBuffer(&geoCBufferDesc, &geoCBufferSubData, &cbGeometryShader);
+			context->GSSetConstantBuffers(0, 1, &cbGeometryShader);
 		}
+		//setting up constant buffer for geo shader//////////////////////////////////////////
 
-		context->PSSetShader(geometries[i].pixelShader, 0, 0);
+		//setting up constant buffer for pixel shader/////////////////////////////////////////
+		if (geometries[i].PixelShader == Trivial_PS || geometries[i].PixelShader == MultiTexture_PS)
+		{
+			D3D11_BUFFER_DESC cBufferPSDesc;
+			ZeroMemory(&cBufferPSDesc, sizeof(cBufferPSDesc));
 
+			cBufferPSDesc.Usage = D3D11_USAGE_DEFAULT;
+			cBufferPSDesc.ByteWidth = sizeof(cbTrivialPS);
+			cBufferPSDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			cBufferPSDesc.CPUAccessFlags = 0;
+			cBufferPSDesc.MiscFlags = 0;
+
+			D3D11_SUBRESOURCE_DATA cBufferPSSubData;
+			ZeroMemory(&cBufferPSSubData, sizeof(cBufferPSSubData));
+
+			cBufferPSSubData.pSysMem = &cbTrivialPS;
+			cBufferPSSubData.SysMemPitch = 0;
+			cBufferPSSubData.SysMemSlicePitch = 0;
+
+			safeRelease(cbTrivialPSBuffer);
+			result = device->CreateBuffer(&cBufferDesc, &cBufferPSSubData, &cbTrivialPSBuffer);
+			context->PSSetConstantBuffers(0, 1, &cbTrivialPSBuffer);
+		}
+		//setting up constant buffer for pixel shader/////////////////////////////////////////
+
+		//setting up constant buffer for domain shader
+		if (geometries[i].domainShader != nullptr)
+		{
+			XMStoreFloat4x4(&cbGridGS.VP, WVP);
+
+			D3D11_BUFFER_DESC geoCBufferDesc;
+			ZeroMemory(&geoCBufferDesc, sizeof(geoCBufferDesc));
+
+			geoCBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+			geoCBufferDesc.ByteWidth = sizeof(cbGridGS);
+			geoCBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			geoCBufferDesc.CPUAccessFlags = 0;
+			geoCBufferDesc.MiscFlags = 0;
+
+			D3D11_SUBRESOURCE_DATA geoCBufferSubData;
+			ZeroMemory(&geoCBufferSubData, sizeof(geoCBufferSubData));
+
+			geoCBufferSubData.pSysMem = &cbGridGS;
+			geoCBufferSubData.SysMemPitch = 0;
+			geoCBufferSubData.SysMemSlicePitch = 0;
+
+			safeRelease(cbGeometryShader);
+			result = device->CreateBuffer(&geoCBufferDesc, &geoCBufferSubData, &cbGeometryShader);
+			context->DSSetConstantBuffers(0, 1, &cbGeometryShader);
+
+		}
+		//setting up constant buffer for domain shader
+
+		//setting up constant buffer for hull shader
+		if (geometries[i].hullShader != nullptr)
+			{
+				D3D11_BUFFER_DESC geoCBufferDesc;
+				ZeroMemory(&geoCBufferDesc, sizeof(geoCBufferDesc));
+
+				geoCBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+				geoCBufferDesc.ByteWidth = sizeof(cbGridHS) + 12;
+				geoCBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+				geoCBufferDesc.CPUAccessFlags = 0;
+				geoCBufferDesc.MiscFlags = 0;
+
+				cbGridHS.distance = 10.0f;
+
+				D3D11_SUBRESOURCE_DATA geoCBufferSubData;
+				ZeroMemory(&geoCBufferSubData, sizeof(geoCBufferSubData));
+
+				geoCBufferSubData.pSysMem = &cbGridHS;
+				geoCBufferSubData.SysMemPitch = 0;
+				geoCBufferSubData.SysMemSlicePitch = 0;
+
+				safeRelease(cbGeometryShader);
+				result = device->CreateBuffer(&geoCBufferDesc, &geoCBufferSubData, &cbGeometryShader);
+				context->HSSetConstantBuffers(0, 1, &cbGeometryShader);
+			}
+		//setting up constant buffer for hull shader
+		*/
+
+#pragma region settingTexturesforPS
+			//setting up texture for pixel shader/////////////////////////////////////////////////
+			if (geometries[i].textureSRV != nullptr && geometries[i].texture1SRV == nullptr)
+			{
+				ID3D11ShaderResourceView* textureSRV[] = { geometries[i].textureSRV };
+				context->PSSetShaderResources(0, 1, textureSRV);
+			}
+			else if (geometries[i].textureSRV != nullptr && geometries[i].texture1SRV != nullptr)
+			{
+				ID3D11ShaderResourceView* textureSRV[] = { geometries[i].textureSRV };
+				context->PSSetShaderResources(0, 1, textureSRV);
+
+				ID3D11ShaderResourceView* texture1SRV[] = { geometries[i].texture1SRV };
+				context->PSSetShaderResources(1, 1, texture1SRV);
+			}
+			//setting up texture for pixel shader/////////////////////////////////////////////////
+#pragma endregion
+
+#pragma region creatingVertexBuffer
 		//creating vertex buffer
-		ZeroMemory(&geometries[i].vertexBuffer, sizeof(geometries[i].vertexBuffer));
+			ZeroMemory(&geometries[i].vertexBuffer, sizeof(geometries[i].vertexBuffer));
 
-		geometries[i].vertexBuffer.Usage = D3D11_USAGE_DEFAULT;
-		geometries[i].vertexBuffer.ByteWidth = sizeof(MY_VERTEX) * geometries[i].vertices.size();
-		geometries[i].vertexBuffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		geometries[i].vertexBuffer.CPUAccessFlags = 0;
-		geometries[i].vertexBuffer.MiscFlags = 0;
+			geometries[i].vertexBuffer.Usage = D3D11_USAGE_DEFAULT;
+			geometries[i].vertexBuffer.ByteWidth = sizeof(MY_VERTEX) * geometries[i].vertices.size();
+			geometries[i].vertexBuffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+			geometries[i].vertexBuffer.CPUAccessFlags = 0;
+			geometries[i].vertexBuffer.MiscFlags = 0;
 
-		ZeroMemory(&geometries[i].vertexBufferSubData, sizeof(geometries[i].vertexBufferSubData));
-		geometries[i].vertexBufferSubData.pSysMem = geometries[i].vertices.data();
-		geometries[i].vertexBufferSubData.SysMemPitch = 0;
-		geometries[i].vertexBufferSubData.SysMemSlicePitch = 0;
+			ZeroMemory(&geometries[i].vertexBufferSubData, sizeof(geometries[i].vertexBufferSubData));
+			geometries[i].vertexBufferSubData.pSysMem = geometries[i].vertices.data();
+			geometries[i].vertexBufferSubData.SysMemPitch = 0;
+			geometries[i].vertexBufferSubData.SysMemSlicePitch = 0;
 
-		UINT stride1 = sizeof(MY_VERTEX);
-		UINT offset1 = 0;
+			UINT stride1 = sizeof(MY_VERTEX);
+			UINT offset1 = 0;
 
-		safeRelease(vertexBuffer);
-		result = device->CreateBuffer(&geometries[i].vertexBuffer, &geometries[i].vertexBufferSubData, &vertexBuffer);
-		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride1, &offset1);
+			safeRelease(vertexBuffer);
+			result = device->CreateBuffer(&geometries[i].vertexBuffer, &geometries[i].vertexBufferSubData, &vertexBuffer);
+			context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride1, &offset1);
+#pragma endregion
 
-		//setting up index buffer
-		ZeroMemory(&geometries[i].indexBuffer, sizeof(geometries[i].indexBuffer));
-		geometries[i].indexBuffer.Usage = D3D11_USAGE_DEFAULT;
-		geometries[i].indexBuffer.ByteWidth = sizeof(unsigned int) * geometries[i].indices.size();
-		geometries[i].indexBuffer.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		geometries[i].indexBuffer.CPUAccessFlags = 0;
-		geometries[i].indexBuffer.MiscFlags = 0;
+#pragma region creatingIndexBuffer
+			//setting up index buffer
+			ZeroMemory(&geometries[i].indexBuffer, sizeof(geometries[i].indexBuffer));
+			geometries[i].indexBuffer.Usage = D3D11_USAGE_DEFAULT;
+			geometries[i].indexBuffer.ByteWidth = sizeof(unsigned int) * geometries[i].indices.size();
+			geometries[i].indexBuffer.BindFlags = D3D11_BIND_INDEX_BUFFER;
+			geometries[i].indexBuffer.CPUAccessFlags = 0;
+			geometries[i].indexBuffer.MiscFlags = 0;
 
-		ZeroMemory(&geometries[i].indexBufferSubData, sizeof(geometries[i].indexBufferSubData));
-		geometries[i].indexBufferSubData.pSysMem = geometries[i].indices.data();
-		geometries[i].indexBufferSubData.SysMemPitch = 0;
-		geometries[i].indexBufferSubData.SysMemSlicePitch = 0;
+			ZeroMemory(&geometries[i].indexBufferSubData, sizeof(geometries[i].indexBufferSubData));
+			geometries[i].indexBufferSubData.pSysMem = geometries[i].indices.data();
+			geometries[i].indexBufferSubData.SysMemPitch = 0;
+			geometries[i].indexBufferSubData.SysMemSlicePitch = 0;
 
-		safeRelease(indexBuffer);
-		device->CreateBuffer(&geometries[i].indexBuffer, &geometries[i].indexBufferSubData, &indexBuffer);
+			safeRelease(indexBuffer);
+			device->CreateBuffer(&geometries[i].indexBuffer, &geometries[i].indexBufferSubData, &indexBuffer);
 
-		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+#pragma endregion
 
 		//setting final drawing stuff
 		context->IASetPrimitiveTopology(geometries[i].topology);
 
 		context->DrawIndexed(geometries[i].indices.size(), 0, 0);
 	}
+		//setting up constant buffer for domain shader
 
 	//////////////////////////////////
 	swapChain->Present(0, 0);
@@ -590,6 +618,8 @@ void Game::Shutdown()
 
 	safeRelease(cbPerObjectBuffer);
 
+	safeRelease(cbGeometryShader);
+
 	safeRelease(envTexture);
 	safeRelease(deWeySRV);
 
@@ -605,14 +635,24 @@ void Game::Shutdown()
 	safeRelease(groundTexture);
 	safeRelease(groundSRV);
 
+	safeRelease(mossTexture);
+	safeRelease(mossSRV);
+
+	safeRelease(sunTexture);
+	safeRelease(sunSRV);
+
 	safeRelease(sampler);
+
+	safeRelease(cbTrivialPSBuffer);
 
 	safeRelease(skyboxTexture);
 	safeRelease(skyboxIndexBuffer);
 	safeRelease(skyboxVertexBuffer);
 	safeRelease(Skybox_VShader);
 	safeRelease(Skybox_PShader);
+
 	safeRelease(skyboxSRV);
+
 	safeRelease(skyboxDSS);
 	safeRelease(skyboxRS);
 
@@ -702,60 +742,7 @@ void Game::initializeWindow(HWND hwnd)
 
 }
 
-//depracated shit
-/*
-void Game::loadPyramid(const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse)
-{
-	geometry geometryToPush;
-
-	geometryToPush.topology = topologyToUse;
-	geometryToPush.textureSRV = textureToUse;
-
-	HRESULT result;
-
-	result = device->CreatePixelShader(pixelShaderData, psSize, NULL, &geometryToPush.pixelShader);
-
-	result = device->CreateVertexShader(vertexShaderData, vsSize, NULL, &geometryToPush.vertexShader);
-
-	geometryToPush.vertices.resize(numPyramidVerts);
-
-	for (unsigned int i = 0; i < numPyramidVerts; i++)
-	{
-		//assigning vert pos
-		geometryToPush.vertices[i].pos.x = pyramidData[i].pos[0];
-		geometryToPush.vertices[i].pos.y = pyramidData[i].pos[1];
-		geometryToPush.vertices[i].pos.z = pyramidData[i].pos[2];
-
-		//assigning rgba
-		//assign random color
-		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		geometryToPush.vertices[i].rgba = { r, g, b, 1.0f };
-
-		//assigning uvs
-		geometryToPush.vertices[i].texPos.x = pyramidData[i].uvw[0];
-		geometryToPush.vertices[i].texPos.y = pyramidData[i].uvw[1];
-
-		//load normals
-		geometryToPush.vertices[i].normals.x = pyramidData[i].nrm[0];
-		geometryToPush.vertices[i].normals.y = pyramidData[i].nrm[1];
-		geometryToPush.vertices[i].normals.z = pyramidData[i].nrm[2];
-	}
-
-	geometryToPush.indices.resize(numPyramidIndices);
-
-	for (unsigned int i = 0; i < numPyramidIndices; i++)
-	{
-		geometryToPush.indices[i] = pyramidIndices[i];
-	}
-
-	geometries.push_back(geometryToPush);
-
-}
-*/
-
-void Game::loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse)
+void Game::loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse, ID3D11ShaderResourceView* texture1ToUse)
 {
 	ifstream objFile;
 
@@ -767,6 +754,12 @@ void Game::loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, c
 
 		geometryToPush.topology = topologyToUse;
 		geometryToPush.textureSRV = textureToUse;
+
+		if (texture1ToUse != nullptr)
+			geometryToPush.texture1SRV = texture1ToUse;
+
+		geometryToPush.PixelShader = pixelShaderData;
+		geometryToPush.VertexShader = vertexShaderData;
 
 		HRESULT result;
 
@@ -1075,13 +1068,14 @@ void Game::CreateSphere(unsigned int latLines, unsigned int longLines, const BYT
 
 	sphere.textureSRV = textureToUse;
 
+	sphere.PixelShader = pixelShaderData;
+	sphere.VertexShader = vertexShaderData;
 
 	vector<MY_VERTEX> sphereVerts(numSphereVerts);
 
 	XMVECTOR currVertexPos = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
 	sphereVerts[0].pos = { 0.0f, 0.0f, 1.0f };
-	sphereVerts[0].rgba = { 1.0f, 1.0f, 1.0f, 1.0f };
 	sphereVerts[0].texPos = { 0.0f, 0.0f };
 	sphereVerts[0].normals = { 0.0f, 0.0f, 0.0f };
 
@@ -1164,9 +1158,104 @@ void Game::CreateSphere(unsigned int latLines, unsigned int longLines, const BYT
 
 	for (unsigned int i = 0; i < sphere.vertices.size(); i++)
 	{
-		sphere.vertices[i].rgba = { 0.0f, 0.0f, 1.0f, 1.0f };
+		sphere.vertices[i].rgba = { 1.0f, 1.0f, 1.0f, 1.0f };
 	}
 
 	geometries.push_back(sphere);
+}
+
+void Game::CreateGrid(unsigned int xMax, unsigned int zMax, float distance, XMFLOAT4 color, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse)
+{
+
+	geometry grid;
+
+	grid.topology = topologyToUse;
+
+	grid.PixelShader = pixelShaderData;
+	grid.VertexShader = vertexShaderData;
+
+	HRESULT result;
+
+	if (geometries.size() < 3)
+	{
+		ZeroMemory(&grid.geometryShader, sizeof(grid.geometryShader));
+		result = device->CreateGeometryShader(Grid_GS, sizeof(Grid_GS), NULL, &grid.geometryShader);
+	}
+	
+	ZeroMemory(&grid.pixelShader, sizeof(grid.pixelShader));
+	result = device->CreatePixelShader(pixelShaderData, psSize, NULL, &grid.pixelShader);
+
+	ZeroMemory(&grid.vertexShader, sizeof(grid.vertexShader));
+	result = device->CreateVertexShader(vertexShaderData, vsSize, NULL, &grid.vertexShader);
+
+
+	for (unsigned int z = 0; z < zMax + 1; z++)
+	{
+		for (unsigned int x = 0; x < xMax + 1; x++)
+		{
+			MY_VERTEX vert;
+			vert.pos = { x * distance, 0.0f, z * distance };
+			vert.rgba = color;
+			vert.texPos.x = (x == 0.0f) ? 0.0f : x / xMax;
+			vert.texPos.y = (z == 0.0f) ? 0.0f : z / zMax;
+			vert.normals = { 0.0f, 0.0f, 0.0f };
+
+			grid.vertices.push_back(vert);
+		}
+	}
+
+	vector<unsigned int> Verts;
+
+	unsigned int index = 0;
+
+	for (unsigned int z = 0; z < zMax; z++)
+	{
+		for (unsigned int x = 0; x < xMax; x++)
+		{
+			Verts.push_back(index);
+			Verts.push_back(index + 1);
+			Verts.push_back(index + xMax + 1);
+			Verts.push_back(index + xMax + 1);
+			Verts.push_back(index + 1);
+			Verts.push_back(index + xMax + 2);
+			index++;
+		}
+		index++;
+	}
+
+	for (int i = Verts.size() - 1; i > -1; i--)
+	{
+		grid.indices.push_back(Verts[i]);
+	}
+
+
+	geometries.push_back(grid);
+
+}
+
+void Game::CalculateNormals(geometry* geo, int index)
+{
+	for (unsigned int i = 0; i < geo->indices.size(); i += 3)
+	{
+
+		XMVECTOR vec1 = XMVector3Transform(XMVectorSet(geo->vertices[geo->indices[i]].pos.x,		geo->vertices[geo->indices[i]].pos.y,		geo->vertices[geo->indices[i]].pos.z, 1.0f),		geo->matrix);
+		XMVECTOR vec2 = XMVector3Transform(XMVectorSet(geo->vertices[geo->indices[i + 1]].pos.x,	geo->vertices[geo->indices[i + 1]].pos.y,	geo->vertices[geo->indices[i + 1]].pos.z, 1.0f),	geo->matrix);
+		XMVECTOR vec3 = XMVector3Transform(XMVectorSet(geo->vertices[geo->indices[i + 2]].pos.x,	geo->vertices[geo->indices[i + 2]].pos.y,	geo->vertices[geo->indices[i + 2]].pos.z, 1.0f),	geo->matrix);
+
+		XMStoreFloat3(&geo->vertices[geo->indices[i]].normals, XMVector3Normalize(XMVector3Cross(vec2, vec3)));
+		XMStoreFloat3(&geo->vertices[geo->indices[i + 1]].normals, XMVector3Normalize(XMVector3Cross(vec1, vec3)));
+		XMStoreFloat3(&geo->vertices[geo->indices[i + 2]].normals, XMVector3Normalize(XMVector3Cross(vec1, vec2)));
+
+		/*XMVECTOR A = XMVectorSet(geo->vertices[geo->indices[i]].pos.x, geo->vertices[geo->indices[i]].pos.y, geo->vertices[geo->indices[i]].pos.z, 1.0f);
+		XMVECTOR B = XMVectorSet(geo->vertices[geo->indices[i + 1]].pos.x, geo->vertices[geo->indices[i + 1]].pos.y, geo->vertices[geo->indices[i + 1]].pos.z, 1.0f);
+		XMVECTOR C = XMVectorSet(geo->vertices[geo->indices[i + 2]].pos.x, geo->vertices[geo->indices[i + 2]].pos.y, geo->vertices[geo->indices[i + 2]].pos.z, 1.0f);
+
+		XMVECTOR faceNormal = XMVector3Cross(B - A, C - A);
+
+		XMStoreFloat3(&geo->vertices[geo->indices[i]].normals,		faceNormal);
+		XMStoreFloat3(&geo->vertices[geo->indices[i + 1]].normals,	faceNormal);
+		XMStoreFloat3(&geo->vertices[geo->indices[i + 2]].normals,	faceNormal);*/
+
+	}
 
 }
