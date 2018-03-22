@@ -28,7 +28,7 @@ float4 main(INPUT inData) : SV_TARGET
 
     float lightRatio = saturate(dot(-dir, inData.Normals));
 
-    lightRatio = saturate(lightRatio + 0.10f);
+    lightRatio = saturate(lightRatio + 0.30f);
 
     return tex1 * tex2 * lightRatio * color;
 }

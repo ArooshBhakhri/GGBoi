@@ -42,6 +42,8 @@ void Game::Initialize(HWND hwnd)
 	CreateDDSTextureFromFile(device, L"height.dds", (ID3D11Resource**)&heightTexture, &heightSRV);
 
 	CreateDDSTextureFromFile(device, L"snowMountain.dds", (ID3D11Resource**)&snowTexture, &snowSRV);
+
+	CreateDDSTextureFromFile(device, L"cloud.dds", (ID3D11Resource**)&cloudTexture, &cloudSRV);
 	//Create models//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////MAKING SKYBOX/////////////////////////////////////////////////////////
@@ -142,16 +144,21 @@ void Game::Initialize(HWND hwnd)
 
 	CreateGrid(50, 50, 1.0f, { 0.44705f, 0.22352f, 0.0f, 1.0f }, Tess_PS, sizeof(Tess_PS), Tess_VS, sizeof(Tess_VS), D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 	//device->CreateGeometryShader(Tess_GS, sizeof(Tess_GS), NULL, &geometries[geometries.size() - 1].geometryShader);
+	geometries[geometries.size() - 1].textureSRV = snowSRV;
 	device->CreateDomainShader(Tess_DS, sizeof(Tess_DS), NULL, &geometries[geometries.size() - 1].domainShader);
 	device->CreateHullShader(Tess_HS, sizeof(Tess_HS), NULL, &geometries[geometries.size() - 1].hullShader);
-	geometries[geometries.size() - 1].textureSRV = snowSRV;
 
 	//Load models
-	loadIOModel("test pyramid.obj", MultiTexture_PS, sizeof(MultiTexture_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV, mossSRV);
+	//loadIOModel("sphere.obj", MultiTexture_PS, sizeof(MultiTexture_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV, mossSRV);
 
-	loadIOModel("test pyramid.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, trippySRV);
+	loadIOModel("sphere.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, sunSRV);
 
-	//loadIOModel("test pyramid.obj", Basic_PS, sizeof(Basic_PS), Grid_VS, sizeof(Grid_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, sunSRV);
+	loadIOModel("sphere.obj", MultiTexture_PS, sizeof(MultiTexture_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, ironSRV, mossSRV);
+
+	loadIOModel("sphere.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
+
+
+	//loadIOModel("sphere.obj", Trivial_PS, sizeof(Trivial_PS), Tess_VS, sizeof(Tess_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, sunSRV);
 
 #pragma region sampler
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -345,12 +352,17 @@ void Game::Update(float delta)
 	geometries[1].matrix = XMMatrixIdentity() * XMMatrixTranslation(-25.0f, -45.0f, -25.0f) * XMMatrixScaling(10.0f, 1.0f, 5.0f) * XMMatrixRotationY(90.0f);
 
 	//left most
-	geometries[2].matrix = XMMatrixIdentity();
-	geometries[2].matrix = geometries[2].matrix * XMMatrixRotationY((float)time.TotalTime()) *  XMMatrixTranslation(sinf((float)time.TotalTime()), -2 * cosf((float)time.TotalTime()), -0.5f * sin((float)time.TotalTime()));
+	//geometries[2].matrix = XMMatrixIdentity();
+	//geometries[2].matrix = geometries[1].matrix * XMMatrixRotationY((float)time.TotalTime()) *  XMMatrixTranslation(sinf((float)time.TotalTime()) + 10.0f, -2 * cosf((float)time.TotalTime()), -0.5f * sin((float)time.TotalTime()));
 
 	//right most
-	geometries[3].matrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	geometries[2].matrix = XMMatrixTranslation(2.0f, 5.0f, 2.0f) * XMMatrixScaling(5.0f, 5.0f, 5.0f);
 
+	geometries[3].matrix = XMMatrixTranslation(10.0f, 1.0f, 10.0f) * geometries[2].matrix * XMMatrixRotationY((float)time.TotalTime());
+
+	geometries[4].matrix = XMMatrixTranslation(35.0f, 2.0f, 35.0f) * geometries[2].matrix * XMMatrixRotationY((float)time.TotalTime() * 2);
+
+	//geometries[2].matrix = XMMatrixIdentity();
 #pragma endregion
 
 }

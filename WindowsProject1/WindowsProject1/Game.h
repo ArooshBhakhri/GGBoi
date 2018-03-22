@@ -109,6 +109,9 @@ private:
 
 	ID3D11Texture2D *snowTexture;
 	ID3D11ShaderResourceView *snowSRV;
+
+	ID3D11Texture2D *cloudTexture;
+	ID3D11ShaderResourceView *cloudSRV;
 	//one sampler for all shaders for now
 	ID3D11SamplerState *sampler;
 
