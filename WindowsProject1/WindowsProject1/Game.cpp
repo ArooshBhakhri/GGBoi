@@ -157,6 +157,8 @@ void Game::Initialize(HWND hwnd)
 
 	loadIOModel("sphere.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
 
+	loadIOModel("ship.obj", Trivial_PS, sizeof(Trivial_PS), Trivial_VS, sizeof(Trivial_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, deWeySRV);
+
 
 	//loadIOModel("sphere.obj", Trivial_PS, sizeof(Trivial_PS), Tess_VS, sizeof(Tess_VS), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, sunSRV);
 
@@ -351,18 +353,14 @@ void Game::Update(float delta)
 
 	geometries[1].matrix = XMMatrixIdentity() * XMMatrixTranslation(-25.0f, -45.0f, -25.0f) * XMMatrixScaling(10.0f, 1.0f, 5.0f) * XMMatrixRotationY(90.0f);
 
-	//left most
-	//geometries[2].matrix = XMMatrixIdentity();
-	//geometries[2].matrix = geometries[1].matrix * XMMatrixRotationY((float)time.TotalTime()) *  XMMatrixTranslation(sinf((float)time.TotalTime()) + 10.0f, -2 * cosf((float)time.TotalTime()), -0.5f * sin((float)time.TotalTime()));
-
-	//right most
 	geometries[2].matrix = XMMatrixTranslation(2.0f, 5.0f, 2.0f) * XMMatrixScaling(5.0f, 5.0f, 5.0f);
 
 	geometries[3].matrix = XMMatrixTranslation(10.0f, 1.0f, 10.0f) * geometries[2].matrix * XMMatrixRotationY((float)time.TotalTime());
 
 	geometries[4].matrix = XMMatrixTranslation(35.0f, 2.0f, 35.0f) * geometries[2].matrix * XMMatrixRotationY((float)time.TotalTime() * 2);
 
-	//geometries[2].matrix = XMMatrixIdentity();
+	geometries[5].matrix = XMMatrixTranslation(0.0f, -10.0f, 0.0f) * XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(90);
+
 #pragma endregion
 
 }
