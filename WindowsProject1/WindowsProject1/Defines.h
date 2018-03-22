@@ -117,5 +117,7 @@ struct cbGrid_GS
 
 struct cbGrid_HS
 {
-	float distance;
+	float x;
+	float y;
+	float z;
 };

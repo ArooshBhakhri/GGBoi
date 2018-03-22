@@ -11,6 +11,12 @@ private:
 
 	float deltaTime = 0;
 
+	HWND hWnd;
+	RECT rect;
+
+	float backbufferHeight = BACKBUFFER_HEIGHT;
+	float backbufferWidth = BACKBUFFER_WIDTH;
+
 	XTime time;
 
 	ID3D11Device * device;
@@ -98,6 +104,11 @@ private:
 	ID3D11Texture2D *sunTexture;
 	ID3D11ShaderResourceView *sunSRV;
 
+	ID3D11Texture2D *heightTexture;
+	ID3D11ShaderResourceView *heightSRV;
+
+	ID3D11Texture2D *snowTexture;
+	ID3D11ShaderResourceView *snowSRV;
 	//one sampler for all shaders for now
 	ID3D11SamplerState *sampler;
 
@@ -130,7 +141,6 @@ private:
 
 	/////////////////////////////////////////
 
-	void setBaseColor(float r, float g, float b, float a);
 	void initializeWindow(HWND hwnd);
 
 public:
@@ -143,5 +153,6 @@ public:
 	void loadIOModel(char* file, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse, ID3D11ShaderResourceView* texture1ToUse = nullptr);
 	void CreateSphere(unsigned int latLines, unsigned int longLines, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse, ID3D11ShaderResourceView* textureToUse);
 	void CreateGrid(unsigned int xMax, unsigned int zMax, float distance, XMFLOAT4 color, const BYTE* pixelShaderData, SIZE_T psSize, const BYTE* vertexShaderData, SIZE_T vsSize, D3D11_PRIMITIVE_TOPOLOGY topologyToUse);
-	void CalculateNormals(geometry* geo, int index);
+	void CalculateNormals();
+	void Resize();
 };
