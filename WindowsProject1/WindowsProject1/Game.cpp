@@ -667,6 +667,9 @@ void Game::Shutdown()
 	safeRelease(snowTexture);
 	safeRelease(snowSRV);
 
+	safeRelease(cloudTexture);
+	safeRelease(cloudSRV);
+
 	safeRelease(sampler);
 
 	safeRelease(cbTrivialPSBuffer);
